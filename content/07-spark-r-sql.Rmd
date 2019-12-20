@@ -1,5 +1,9 @@
 # Using R to construct SQL queries and let Spark execute them
 
+> I feel honoured to be the second to whom you turn. What have I done to deserve to be so high on your list?
+>
+> _Yennefer of Vengerberg_
+
 In the [previous chapter](constructing-functions-by-piping-dplyr-verbs.html) of this series, we looked at writing R functions that can be executed directly by Spark without serialization overhead with a focus on writing functions as combinations of dplyr verbs and investigated how the SQL is generated and Spark plans created.
 
 In this chapter, we will look at how to write R functions that generate SQL queries that can be executed by Spark, how to execute them with DBI and how to achieve lazy SQL statements that only get executed when needed. We also briefly present wrapping these approaches into functions that can be combined with other Spark operations.
@@ -45,7 +49,7 @@ head(res)
 
 As we might have noticed thanks to the way the result is printed, a standard data frame is returned, as opposed to tibbles returned by most sparklyr operations.
 
-> It is important to note that using `dbGetQuery()` *automatically computes and collects* the results to the R session. This is in contrast with the dplyr approach which constructs the query and only collects the results to the R session when `collect()` is called, or computes them when `compute()` is called.
+It is important to note that using `dbGetQuery()` *automatically computes and collects* the results to the R session. This is in contrast with the dplyr approach which constructs the query and only collects the results to the R session when `collect()` is called, or computes them when `compute()` is called.
 
 We will now examine 2 options to use the prepared query lazily and without collecting the results into the R session.
 

@@ -1,13 +1,17 @@
 # Exploring the invoke API from R with Java reflection and examining invokes with logs
 
-In the previous parts of this series, we have shown how to write functions as both [combinations of dplyr verbs](https://jozef.io/r202-spark-r-dplyr-verbs/), [SQL query generators](https://jozef.io/r203-spark-r-sql/) that can be executed by Spark and [how to use the lower-level API](https://jozef.io/r204-spark-r-invoke-scala/) to invoke methods on Java object references from R.
+> Then darkness took me, and I strayed out of thought and time, and I wandered far on roads that I will not tell
+> 
+> _Gandalf the White_
+
+In the previous chapters, we have shown how to write functions as both [combinations of dplyr verbs](https://jozef.io/r202-spark-r-dplyr-verbs/), [SQL query generators](https://jozef.io/r203-spark-r-sql/) that can be executed by Spark and [how to use the lower-level API](https://jozef.io/r204-spark-r-invoke-scala/) to invoke methods on Java object references from R.
 
 In this chapter, we will look into more details around sparklyr's `invoke()` API, investigate available methods for different classes of objects using the Java reflection API and look under the hood of the sparklyr interface mechanism with invoke logging.
 
 
 ## Examining available methods from R
 
-> If you did not do so, it is recommended to read the [previous part](https://jozef.io/r204-spark-r-invoke-scala/) of this series before this one to get a quick overview of the `invoke()` API.
+If you did not do so, it is recommended to read the [previous chapter](using-the-lower-level-invoke-api-to-manipulate-sparks-java-objects-from-r.html) of this book before this one to get a quick overview of the `invoke()` API.
 
 
 ## Using the Java reflection API to list the available methods
@@ -105,7 +109,7 @@ spark_confs <- vapply(spark_confs, invoke, "toString", FUN.VALUE = character(1))
 sort(spark_confs)[c(2, 3, 12, 14)]
 ```
 
-> Looking at [the Scala documentation for the `getAll` method](https://spark.apache.org/docs/1.6.0/api/java/org/apache/spark/SparkConf.html#getAll()), we actually see that there is information missing on our data - the classes of the objects in the tuple, which in this case is `scala.Tuple2<java.lang.String,java.lang.String>[]`.
+Looking at [the Scala documentation for the `getAll` method](https://spark.apache.org/docs/1.6.0/api/java/org/apache/spark/SparkConf.html#getAll()), we actually see that there is information missing on our data - the classes of the objects in the tuple, which in this case is `scala.Tuple2<java.lang.String,java.lang.String>[]`.
 
 We could therefore improve our helper to be more detailed in the return value information.
 

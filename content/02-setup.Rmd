@@ -2,6 +2,8 @@
 
 An exhaustive list of instructions on setting up sparklyr is not in the scope of this book, below we  provide a quick set of instructions to get a local Spark instance working with sparklyr in an interactive setting. 
 
+![Apache Spark and R logos](static/img/r201-01-spark-and-r.png)
+
 We have however prepared a dedicated Docker image that has all the prerequisities readily available to use. we recommend using this pre-built image for the best experience using this book.
 
 ## Interactive manual installation

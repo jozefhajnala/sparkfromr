@@ -11,7 +11,7 @@ In this chapter, we will look at how to write R functions that can be executed d
 
 One of the approaches to retain the performance of Spark with arbitrary R functionality is to carefully design our functions such that in its entirety when using it with sparklyr, the function call can be translated directly to Spark SQL using dbplyr. 
 
-> This allows us to write, package, test, and document the functions as we normally would, while still getting the performance benefits of Apache Spark.
+This allows us to write, package, test, and document the functions as we normally would, while still getting the performance benefits of Apache Spark.
 
 Let's look at an example where we would like to do simple transformations of data stored in a column of a data frame, such as normalization of one of the columns. For illustration purposes, we will normalize the values of a column by first subtracting the mean value and then dividing the values by the standard deviation.
 
@@ -132,7 +132,7 @@ delay_by_visib %>% dplyr::explain()
 
 Some of the appeal of the dplyr syntax comes from the fact that we can use the same functions to conveniently manipulate local data frames in memory and, with the very same code, data from remote sources such as relational databases, data.tables and even data within Spark.
 
-> This unified front-end, however, comes with some important differences that we must be aware of when applying and porting code from using it to manipulate and compute on local data versus on remote sources. The same holds for remote Spark DataFrames that we are manipulating when using dplyr functions.
+This unified front-end, however, comes with some important differences that we must be aware of when applying and porting code from using it to manipulate and compute on local data versus on remote sources. The same holds for remote Spark DataFrames that we are manipulating when using dplyr functions.
 
 An example of a different behavior is joining. The very simplest example - trying to inner join two tables can lead to a different amount of rows for the remote Spark DataFrames and the local R data frames:
 
@@ -176,6 +176,6 @@ And, rather obviously, when using Hive built-in functions in the dplyr-based fun
 
 In this part of the series, we have shown that we can take advantage of the performance of Spark while still writing arbitrary R functions by using dplyr syntax, which supports translation to Spark SQL using the dbplyr backend. We have also looked at some important differences when applying the same dplyr transformations to local and remote data sets.
 
-> With this approach, we can use R development best practices, testing, and documentation methods in a standard way when writing our R packages, getting the best of both worlds - Apache Spark for performance and R for convenient development of data science applications.
+With this approach, we can use R development best practices, testing, and documentation methods in a standard way when writing our R packages, getting the best of both worlds - Apache Spark for performance and R for convenient development of data science applications.
 
 In the next chapter, we will look at writing R functions that will be using SQL directly, instead of relying on dbplyr for the translation, and how we can efficiently send them to the Spark instance for execution and optionally retrieve the results to our R session.

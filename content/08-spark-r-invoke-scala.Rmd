@@ -1,8 +1,12 @@
 # Using the lower-level invoke API to manipulate Spark's Java objects from R
 
+> There will be no foolish wand-waving or silly incantations in this class.
+>
+> _Severus Snape_
+
 In the previous chapters, we have shown how to write functions as both [combinations of dplyr verbs](constructing-functions-by-piping-dplyr-verbs.html) and [SQL query generators](using-r-to-construct-sql-queries-and-let-spark-execute-them.html) that can be executed by Spark, how to execute them with DBI and how to achieve lazy SQL statements that only get executed when needed.
 
-> In this fourth part, we will look at how to write R functions that interface with Spark via a lower-level invocation API that lets us use all the functionality that is exposed by the Scala Spark APIs. We will also show how such R calls relate to Scala code.
+In this chapter, we will look at how to write R functions that interface with Spark via a lower-level invocation API that lets us use all the functionality that is exposed by the Scala Spark APIs. We will also show how such R calls relate to Scala code.
 
 ## The invoke() API of sparklyr
 

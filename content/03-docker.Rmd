@@ -7,7 +7,7 @@ For the purpose of this book, a [Docker image](https://hub.docker.com/repository
 The installation instructions for Docker are very accessible and should get you going fairly quickly. We provide links to them, please choose based on your platform:
 
 - [Windows 10 64-bit: Pro, Enterprise, or Education](https://docs.docker.com/docker-for-windows/install/)
-- [Windows 10 home or 7](https://docs.docker.com/toolbox/toolbox_install_windows/)
+- [Windows 10 home or Windows 7](https://docs.docker.com/toolbox/toolbox_install_windows/)
 - [Ubuntu](https://docs.docker.com/install/linux/docker-ce/ubuntu/)
 - [Centos](https://docs.docker.com/install/linux/docker-ce/centos/)
 - [Debian](https://docs.docker.com/install/linux/docker-ce/debian/)

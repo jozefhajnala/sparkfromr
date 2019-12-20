@@ -1,0 +1,5 @@
+# Extending Spark API
+
+> Differences of habit and language are nothing at all if our aims are identical and our hearts are open
+>
+> _Albus Dumbledore_

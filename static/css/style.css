@@ -1,6 +1,8 @@
 p.caption {
   color: #777;
-  margin-top: 10px;
+  margin-top: 0.5em;
+  margin-bottom: 2em;
+  font-size: 50%;
 }
 p code {
   white-space: inherit;
@@ -11,4 +13,12 @@ pre {
 }
 pre code {
   white-space: inherit;
+}
+.wizardry {
+  font-size: 120%;
+  font-style: italic;
+  font-family: serif;
+  padding: 0.5em 1.5em 0.5em 1.5em;
+  margin: 2em;
+  border-left: 5px solid;
 }

@@ -1,0 +1,31 @@
+--- 
+title: "Using Spark from R for performance with arbitrary code"
+author: "Jozef Hajnala"
+date: "`r Sys.Date()`"
+site: bookdown::bookdown_site
+documentclass: book
+biblio-style: apalike
+link-citations: yes
+description: "This bookdown publication attempts to provide practical insights into using the sparklyr interface to gain the benefits of Apache Spark while still retaining the ability to use R code organized in custom-built functions and packages."
+---
+
+# Welcome
+
+Apache Spark is a popular open-source analytics engine for big data processing and thanks to the sparklyr and SparkR packages, the power of Spark is also available to R users.
+
+This short bookdown publication attempts to provide practical insights into using the sparklyr interface to gain the benefits of Apache Spark while still retaining the ability to use R code organized in custom-built functions and packages. 
+
+The focus of this publication is on exploring the *different interfaces* avaialable for communication between R and Spark using the sparklyr package, namely:
+
+- [Constructing functions by piping dplyr verbs](constructing-functions-by-piping-dplyr-verbs.html)
+- [Constructing SQL and executing it with Spark](constructing-sql-and-executing-it-with-spark.html)
+- [Using the lower-level invoke API to manipulate Spark’s Java objects from R](using-the-lower-level-invoke-api-to-manipulate-sparks-java-objects-from-r.html)
+- [Exploring the invoke API from R with Java reflection and examining invokes with logs](exploring-the-invoke-api-from-r-with-java-reflection-and-examining-invokes-with-logs.html)
+
+If you are interested in the sparklyr package and working with Spark from R in general, we strongly recommend the _very comprehensive [Mastering Spark with R](https://therinspark.com/) book_ available online for free.
+
+```{block, type='wizardry'}
+Differences of habit and language are nothing at all if our aims are identical and our hearts are open
+
+* Albus Dumbledore
+```

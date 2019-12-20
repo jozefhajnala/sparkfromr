@@ -1,0 +1,21 @@
+# Setting up Spark with R and sparklyr
+
+An exhaustive list of instructions on setting up sparklyr is not in the scope of this book as it is extensively [covered elsewhere](https://therinspark.com/starting.html), below we provide a quick set of instructions to get a local Spark instance working with sparklyr in an interactive setting.
+
+We have however prepared a [dedicated Docker image](using-a-ready-made-docker-image.html) that has all the prerequisities readily available to use. We recommend using this pre-built image for the best experience using this book.
+
+## Interactive manual installation
+
+In case the Docker approach is not suitable for you, the following are very basic instructions to install the sparklyr package with its dependencies, the nycflights13 package for example data and Spark version 2.4.3.
+
+```{r r201_spark_installation, eval=FALSE}
+install.packages("sparklyr")
+install.packages("nycflights13")
+sparklyr::spark_install(version = "2.4.3")
+```
+
+For troubleshooting and more detailed step-by-step guides please refer to:
+
+- The [Getting Started chapter](https://therinspark.com/starting.html) of the Mastering Spark with R book
+- The [Prerequisites appendix](https://therinspark.com/appendix.html#appendix-prerequisites) f the Mastering Spark with R book
+- RStudio's [spark website](https://spark.rstudio.com/#installation).

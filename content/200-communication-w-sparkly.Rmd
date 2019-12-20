@@ -1,0 +1,103 @@
+# Communication between Spark and sparklyr
+
+In this chapter, we will examine how the sparklyr interface communicates with the Spark instance and what this means for performance with regards to arbitrarily defined R functions. We will also look at how Apache Arrow can improve the performance of object serialization.
+
+## Sparklyr as a Spark interface provider
+
+The sparklyr package is an R _interface_ to Apache Spark. The meaning of the word interface is very important in this context as the way we use this interface can significantly affect the performance benefits we get from using Spark.
+
+To understand the meaning of the above a bit better, we will examine 3 very simple functions that are different in implementation but intend to provide the same results, and how they behave with regards to Spark. We will keep using the datasets from the [nycflights13](https://cran.r-project.org/package=nycflights13) package for our examples.
+
+## An R function translated to Spark SQL
+
+Using the following `fun_implemented()` function will yield the expected results for both a local data frame `nycflights13::weather` and the remote Spark object referenced by `tbl_weather`:
+
+```{r r201_define_fun_implemented}
+# An R function `tolower` translated to Spark SQL
+fun_implemented <- function(df, col) {
+  df %>% mutate({{col}} := tolower({{col}}))
+}
+```
+
+First, let us run `fun_implemented` for a local data frame in our R session. Note that the output of the command is `A tibble: 26,115 x 15`, meaning this is an object in our local R session.
+
+```{r r201_test_fun_implemented_local}
+fun_implemented(nycflights13::weather, origin)
+```
+
+Next, we use it against a remote Spark DataFrame. Notice that here the output is a remote object with `Source: spark<?> [?? x 16]` and once again, Spark only executed the minimal work to show this printout, so we do not yet know, how many lines in total are in the resulting DataFrame. We will talk about this in more detail in the later chapters.
+
+```{r r201_test_fun_implemented_spark}
+fun_implemented(tbl_weather, origin)
+```
+
+So how does Spark know the R function `tolower()`? Our function call worked within Spark because the R function `tolower()` was translated by `dbplyr` to Spark SQL function `LOWER` and the resulting query was sent to Spark to be executed.
+
+We can see the actual translated SQL by running `sql_render()` on the function call:
+
+```{r r201_render_fun_implemented, linewidth=60}
+dbplyr::sql_render(
+  fun_implemented(tbl_weather, origin)
+)
+```
+
+
+## An R function not translated to Spark SQL
+
+Using the following `fun_r_only()` function will only yield the expected results for a local data frame `nycflights13::weather`. For the remote Spark object referenced by `tbl_weather` we will get an error:
+
+```{r r201_define_fun_r_only}
+# An R function `casefold` not translated to Spark SQL
+fun_r_only <- function(df, col) {
+  df %>% mutate({{col}} := casefold({{col}}, upper = FALSE))
+}
+```
+
+The function executes successfully on a local R data frame (tibble) as R knows the function `casefold`:
+
+```{r r201_test_fun_r_only}
+fun_r_only(nycflights13::weather, origin)
+```
+
+Trying to execute `fun_r_only()` against a Spark DataFrame however errors:
+
+```{r r201_test_fun_r_only_spark, error=TRUE, error.lines=5, warning=FALSE}
+fun_r_only(tbl_weather, origin)
+```
+
+This is because there simply is no translation provided by dbplyr for the `casefold()` function. The generated Spark SQL will therefore not be valid and throw an error once the Spark SQL parser tries to parse it.
+
+## A Hive built-in function not existing in R
+
+On the other hand, using the below `fun_hive_builtin()` function will only yield the expected results for the remote Spark object referenced by `tbl_weather`. For the local data frame `nycflights13::weather` we will get an error:
+
+```{r r201_define_fun_hive_builtin}
+# A Hive built-in function `lower` not existing in R
+fun_hive_builtin <- function(df, col) {
+  df %>% mutate({{col}} := lower({{col}}))
+}
+```
+
+The function fails to execute on a local R data frame (tibble) as R does not know the function `lower()`:
+
+```{r r201_test_fun_hive_builtin_local, error=TRUE}
+fun_hive_builtin(nycflights13::weather, origin)
+```
+
+However, against a Spark DataFrame the code works as desired:
+
+```{r r201_test_fun_hive_builtin_spark}
+fun_hive_builtin(tbl_weather, origin)
+```
+
+This is because, as seen above the function `lower()` does not exist in R itself. For a non-existing R function there obviously can be no dbplyr translation either. In this case, dbplyr keeps it as-is when translating to SQL, not doing any translation. 
+
+The SQL will be valid and executed without problems because `lower` is, in fact, a function built-in to Hive, so the following generated SQL is valid.
+
+```{r r201_render_fun_hive_builtin, linewidth=60}
+dbplyr::sql_render(fun_hive_builtin(tbl_weather, origin))
+```
+
+## Using non-translated functions with sparklyr
+
+It can easily happen that one of the functions we want to use falls into the category where it is neither translated or a Hive built-in function. In this case, there is another interface provided by sparklyr that can allow us to do that - the `spark_apply()` function. We will look into this interface in more detail in [the next chapter](non-translated-functions-with-spark-apply.html).

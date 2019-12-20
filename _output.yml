@@ -1,0 +1,12 @@
+bookdown::gitbook:
+  includes:
+    in_header: [
+      static/html/include_ga.html
+    ] 
+  css: static/css/style.css
+  config:
+    toc:
+      before: |
+        <li><a href="./index.html">Spark from R for performance</a></li>
+      after: |
+        <li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>

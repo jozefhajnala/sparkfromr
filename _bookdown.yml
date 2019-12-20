@@ -1,0 +1,23 @@
+book_filename: "sparkfromr"
+delete_merged_file: true
+language:
+  ui:
+    chapter_name: "Chapter "
+output_dir: "_output"
+rmd_files: [
+  "index.Rmd",
+  "content/000-setup-benchmarks.Rmd",
+  "content/001-setup-knitr-hooks.Rmd",
+  "content/100-setting-up-manual.Rmd",
+  "content/101-setting-up-docker.Rmd",
+  "content/102-connecting-to-local.Rmd",
+  "content/200-communication-w-sparkly.Rmd",
+  "content/210-spark-apply.Rmd",
+  "content/220-dplyr-verbs.Rmd",
+  "content/221-sql.Rmd",
+  "content/230-invoke.Rmd",
+  "content/231-invoke-reflection-logging.Rmd",
+  "content/240-combining-approaches.Rmd",
+  "content/400-references.Rmd",
+  "content/410-footnotes.Rmd"
+]

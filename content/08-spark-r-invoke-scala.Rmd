@@ -1,0 +1,190 @@
+# Using the lower-level invoke API to manipulate Spark's Java objects from R
+
+In the previous chapters, we have shown how to write functions as both [combinations of dplyr verbs](constructing-functions-by-piping-dplyr-verbs.html) and [SQL query generators](using-r-to-construct-sql-queries-and-let-spark-execute-them.html) that can be executed by Spark, how to execute them with DBI and how to achieve lazy SQL statements that only get executed when needed.
+
+> In this fourth part, we will look at how to write R functions that interface with Spark via a lower-level invocation API that lets us use all the functionality that is exposed by the Scala Spark APIs. We will also show how such R calls relate to Scala code.
+
+## The invoke() API of sparklyr
+
+So far when interfacing with Spark from R, we have used the sparklyr package in three ways:
+
+- Writing combinations of dplyr verbs that would be translated to Spark SQL via the dbplyr package and the SQL executed by Spark when requested
+- Generating Spark SQL code directly and sending it for execution in multiple ways
+- Combinations of the above two methods
+
+What these methods have in common is that they translate operations written in R to Spark SQL and that SQL code is then sent for execution by our Spark instance.
+
+There is however another approach that we can use with sparklyr, which will be more familiar to users or developers who have worked with [packages like rJava](https://jozef.io/r901-primer-java-from-r-1/) or rscala before. Even though arguably less convenient than the APIs provided by the 2 aforementioned packages, sparklyr provides an invocation API that exposes 3 functions:
+
+1. `invoke(jobj, method, ...)` to execute a method on a Java object reference 
+2. `invoke_static(sc, class, method, ...)` to execute a static method associated with a Java class
+3. `invoke_new(sc, class, ...)` to invoke a constructor associated with a Java class
+
+
+Let us have a look at how we can use those functions in practice to efficiently work with Spark from R.
+
+## Getting started with the invoke API
+
+We can start with a few very simple examples of `invoke()` usage, for instance getting the number of rows of the `tbl_flights`:
+
+```{r r204_invoke_preview_count}
+# Get the count of rows
+tbl_flights %>% spark_dataframe() %>%
+  invoke("count")
+```
+
+We see one extra operation before invoking the count: `spark_dataframe()`. This is because the `invoke()` interface works with Java object references and not `tbl` objects in remote sources such as `tbl_flights`. We, therefore, need to convert `tbl_flights` to a Java object reference, for which we use the `spark_dataframe()` function.
+
+Now, for something more exciting, let us compute a summary of the variables in `tbl_flights` using the `describe` method:
+
+```{r r204_invoke_preview_summary}
+tbl_flights_summary <- tbl_flights %>% spark_dataframe() %>%
+  invoke("describe", as.list(colnames(tbl_flights))) %>%
+  sdf_register()
+tbl_flights_summary
+```
+
+We also one see extra operation after invoking the describe method: `sdf_register()`. This is because the `invoke()` interface also _returns_ Java object references and we may like to see a more user-friendly `tbl` object instead. This is where `sdf_register()` comes in  to register a Spark DataFrame and return a `tbl_spark` object back to us.
+
+And indeed, we can see that the wrapper `sdf_describe()` provided by the sparklyr package itself works in a very similar fashion:
+
+```{r r204_invoke_preview_sdf_describe}
+sparklyr::sdf_describe
+```
+
+
+If we so wish, for DataFrame related object references, we can also call `collect()` to retrieve the results directly, without using `sdf_register()` first, for instance retrieving the full content of the `origin` column:
+
+```{r r204_invoke_preview_select}
+tbl_flights %>% spark_dataframe() %>%
+  invoke("select", "origin", list()) %>%
+  collect()
+```
+
+It can also be helpful to investigate the schema of our flights DataFrame:
+
+```{r r204_invoke_preview_schema}
+tbl_flights %>% spark_dataframe() %>%
+  invoke("schema")
+```
+
+We can also use the invoke interface on other objects, for instance the `SparkContext`. Let's for instance retrieve the `uiWebUrl` of our context:
+
+```{r r204_invoke_preview_uiweburl}
+sc %>% spark_context() %>%
+  invoke("uiWebUrl") %>%
+  invoke("toString")
+```
+
+## Grouping and aggregation with invoke chains
+
+Imagine we would like to do simple aggregations of a Spark DataFrame, such as an average of a column grouped by another column. For reference, we can do this very simply using the dplyr approach. Let's compute the average departure delay by origin of the flight:
+
+```{r r204_grpagg_dplyr}
+tbl_flights %>%
+  group_by(origin) %>%
+  summarise(avg(dep_delay))
+```
+
+Now we will show how to do the same aggregation via the lower level API. Using the Spark shell we would simply do:
+
+```{scala grpagg_scala, eval=FALSE}
+flights.
+  groupBy("origin").
+  agg(avg("dep_delay"))
+```
+
+Translating that into the lower level `invoke()` API provided by sparklyr looks something like this:
+
+```{r r204_grpagg_invoke, echo=TRUE, eval=FALSE}
+tbl_flights %>%
+  spark_dataframe() %>%
+  invoke("groupBy", "origin", list()) %>%
+  invoke("agg", invoke_static(sc, "org.apache.spark.sql.functions", "expr", "avg(dep_delay)"), list()) %>%
+  sdf_register()
+```
+
+### What is all that extra code?
+
+Now, compared to the very simple 2 operations in the Scala version, we have some gotchas to examine:
+
+- one of the `invoke()` calls is quite long. Instead of just `avg("dep_delay")` like in the Scala example, we use `invoke_static(sc, "org.apache.spark.sql.functions", "expr", "avg(dep_delay)")`. This is because the `avg("dep_delay")` expression is somewhat of a syntactic sugar provided by Scala, but when calling from R we need to provide the object reference hidden behind that sugar.
+
+- the empty `list()` at the end of the `"groupBy"` and `"agg"` invokes. This is needed as a workaround some Scala methods [take String, String*](https://spark.apache.org/docs/latest/api/scala/index.html#org.apache.spark.sql.Dataset@groupBy(col1:String,cols:String*):org.apache.spark.sql.RelationalGroupedDataset) as arguments and sparklyr currently does not support variable parameters. We can pass `list()` to represent an empty `String[]` in Scala as the needed second argument.
+
+## Wrapping the invocations into R functions
+
+Seeing the above example, we can quickly write a useful wrapper to ease the pain a little. First, we can create a small function that will generate the aggregation expression we can use with `invoke("agg", ...)`:
+
+```{r r204_define_agg_expr}
+agg_expr <- function(tbl, exprs) {
+  sparklyr::invoke_static(
+    tbl[["src"]][["con"]],
+    "org.apache.spark.sql.functions",
+    "expr",
+    exprs
+  )
+}
+```
+
+Next, we can wrap around the entire process to make a more generic aggregation function, using the fact that a remote tibble has the details on `sc` within its `tbl[["src"]][["con"]]` element:
+
+```{r r204_define_grpagg_invoke}
+grpagg_invoke <- function(tbl, colName, groupColName, aggOperation) {
+  avgColumn <- tbl %>% agg_expr(paste0(aggOperation, "(", colName, ")"))
+  tbl %>%  spark_dataframe() %>% 
+    invoke("groupBy", groupColName, list()) %>%
+    invoke("agg", avgColumn, list()) %>% 
+    sdf_register()
+}
+```
+
+And finally use our wrapper to get the same results in a more user-friendly way:
+
+```{r r204_test_grpagg_invoke}
+tbl_flights %>% 
+  grpagg_invoke("arr_delay", groupColName = "origin", aggOperation = "avg")
+```
+
+## Reconstructing variable normalization
+
+Now we will attempt to construct the variable normalization that we have shown in the previous parts with dplyr verbs and SQL generation - we will normalize the values of a column by first subtracting the mean value and then dividing the values by the standard deviation:
+
+```{r r204_define_normalize_invoke}
+normalize_invoke <- function(tbl, colName) {
+  sdf <- tbl %>% spark_dataframe()
+  stdCol <- agg_expr(tbl, paste0("stddev_samp(", colName, ")"))
+  avgCol <- agg_expr(tbl, paste0("avg(", colName, ")"))
+  avgTemp <- sdf %>% invoke("agg", avgCol, list()) %>% invoke("first")
+  stdTemp <- sdf %>% invoke("agg", stdCol, list()) %>% invoke("first")
+  newCol <- sdf %>%
+    invoke("col", colName) %>%
+    invoke("minus", as.numeric(avgTemp)) %>%
+    invoke("divide", as.numeric(stdTemp))
+  sdf %>%
+    invoke("withColumn", colName, newCol) %>%
+    sdf_register()
+}
+
+tbl_weather %>% normalize_invoke("temp")
+```
+
+The above implementation is just an example and far from optimal, but it also has a few interesting points about it:
+
+- Using `invoke("first")` will actually compute and collect the value into the R session
+- Those collected values are then sent back during the `invoke("minus", as.numeric(avgTemp))` and `invoke("divide", as.numeric(stdTemp))`
+
+This means that there is unnecessary overhead when sending those values from the Spark instance into R and back, which will have slight performance penalties.
+
+## Where invoke can be better than dplyr translation or SQL
+
+As we have seen in the above examples, working with the `invoke()` API can prove more difficult than using the intuitive syntax of dplyr or SQL queries. In some use cases, the trade-off may still be worth it. In our practice, these are some examples of such situations:
+
+- When Scala's Spark API is more flexible, powerful or suitable for a particular task and the translation is not as good
+- When performance is crucial and we can produce more optimal solutions using the invocations
+- When we know the Scala API well and not want to invest time to learn the dplyr syntax, but it is easier to translate the Scala calls into a series of `invoke()` calls
+- When we need to interact and manipulate other Java objects apart from the standard Spark DataFrames
+
+## Conclusion
+
+In this chapter, we have looked at how to use the lower-level invoke interface provided by sparklyr to manipulate Spark objects and other Java object references. In the following part, we will dig a bit deeper and look into using Java's reflection API to make the invoke interface more accessible from R, getting detail invocation logs and more.

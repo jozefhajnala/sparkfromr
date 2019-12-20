@@ -1,0 +1,24 @@
+# References
+
+## Apache Arrow
+
+- Homepage of [Apache Arrow](https://arrow.apache.org/)
+- R package [arrow on CRAN](https://cran.r-project.org/package=arrow)
+- Arrow C++ library [installation guide](https://arrow.apache.org/install/)
+- R Apache Arrow [on GitHub](https://github.com/apache/arrow/tree/master/r)
+
+## DBI, Spark SQL, Hive
+
+- Documentation on [Hive Operators and User-Defined Functions](https://cwiki.apache.org/confluence/display/Hive/LanguageManual+UDF) website
+- The [DBI package](https://cran.r-project.org/package=DBI) on CRAN
+
+## Docker
+
+## dplyr syntax
+
+- Overview of the [dplyr syntax](https://dplyr.tidyverse.org/)
+
+## Java, Scala and friends
+
+- Wikipedia's article on [Method Chaining](https://en.wikipedia.org/wiki/Method_chaining)
+- Stackoverflow [discussion of reflection](https://stackoverflow.com/questions/37628/what-is-reflection-and-why-is-it-useful)

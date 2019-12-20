@@ -1,0 +1,74 @@
+# Using a ready-made Docker Image
+
+For the purpose of this book, a [Docker image](https://hub.docker.com/repository/docker/jozefhajnala/sparkfromr) was built which you can use to experiment in the following ways by running one of the commands below within a terminal. If you are using RStudio 1.1 or newer, [Terminal functionality](https://jozef.io/r905-rstudio-terminal/) is built into RStudio itself.
+
+## Installing Docker
+
+The installation instructions for Docker are very accessible and should get you going fairly quickly. We provide links to them, please choose based on your platform:
+
+- [Windows 10 64-bit: Pro, Enterprise, or Education](https://docs.docker.com/docker-for-windows/install/)
+- [Windows 10 home or 7](https://docs.docker.com/toolbox/toolbox_install_windows/)
+- [Ubuntu](https://docs.docker.com/install/linux/docker-ce/ubuntu/)
+- [Centos](https://docs.docker.com/install/linux/docker-ce/centos/)
+- [Debian](https://docs.docker.com/install/linux/docker-ce/debian/)
+- [Fedora](https://docs.docker.com/install/linux/docker-ce/fedora/)
+- [Mac](https://docs.docker.com/docker-for-mac/install/)
+
+## Using the Docker image with R
+
+The Docker image we prepared contains all the prerequisites needed to run all the code chunks present in this book. In fact, this very image is used to render the book itself. If you are interested in the details around the image, please feel free to visit the [GitHub repository](https://github.com/jozefhajnala/sparkfromr_docker) from where it is openly accessible. 
+
+Now we look at how we use the image in practice in a few ways.
+
+### Interactively with RStudio
+
+Running the following line of code in a terminal should create a container and expose RStudio for use:
+
+```{bash r201_docker_run_rstudio, eval=FALSE}
+# Your can replace pass with a password of your choice
+docker run -d -p 8787:8787 -e PASSWORD=pass --name rstudio jozefhajnala/sparkfromr:latest
+```
+
+Open your favourite web browser such as Google Chrome or Firefox and navigate to http://localhost:8787. You should be greeted by the RStudio login screen and you can use
+
+- Username: `rstudio`
+- Password: `pass` (or the one you chose above)
+
+Now you can freely start to use the code content of the book, starting by connecting to a local Spark instance:
+
+```{r r201_init_connection, eval=FALSE}
+library(sparklyr)
+sc <- spark_connect("local")
+```
+
+### Interactively with the R console
+
+Running the following should yield an interactive R session with all prerequisites to start working with the sparklyr package using a local Spark instance.
+
+```{bash r201_docker_run_r, eval=FALSE}
+docker run --rm -it jozefhajnala/sparkfromr:latest R
+```
+
+Now you can freely start to use the code content of the book from the R consule, starting by connecting to a local Spark instance:
+
+```{R r201_init_connection_console, eval=FALSE}
+# Start using sparklyr
+library(sparklyr)
+sc <- spark_connect("local")
+```
+
+### Running an example R script
+
+Running the following should execute an example R script using sparklyr with output appearing in the terminal:
+  
+```{bash r201_docker_run_rscript, eval=FALSE}
+docker run --rm jozefhajnala/sparkfromr:latest Rscript /root/.local/spark_script.R
+```
+
+## Interactively with the Spark shell
+
+Running the following should yield an interactive Scala REPL instance. A Spark context should be available as `sc` and a Spark session as `spark`.
+
+```{bash r201_docker_run_spark_shell, eval=FALSE}
+docker run --rm -it jozefhajnala/sparkfromr:latest /root/spark/spark-2.4.3-bin-hadoop2.7/bin/spark-shell
+```

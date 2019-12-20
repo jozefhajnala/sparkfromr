@@ -1,0 +1,65 @@
+```{r r201_setup_benchmarks, echo=FALSE}
+# This sets up the infrastructure for rendering highchart
+# bench marks that we do not want to re-compute on build
+
+suppressPackageStartupMessages({
+  library(highcharter)
+  library(magrittr)
+  library(jhaddins)
+})
+
+makeBenchBoxPlot <- function(
+  bench, title, seriesName = title, 
+  bp_opts = list(
+    fillColor = '#C9E4FF', lineWidth = 0.5, medianWidth = 1,
+    stemDashStyle = 'dot', stemWidth = 1, whiskerLength = '40%', whiskerWidth = 1
+  )
+) {
+  suppressWarnings(
+    hcboxplot(
+      x = round(bench$time / 10 ^ 6, 0),
+      var = bench$expr,
+      color = "blue",
+      outliers = FALSE,
+      name = seriesName
+    ) %>%
+      hc_chart(type = "column") %>%
+      hc_title(text = title) %>%
+      hc_yAxis(min = 0, title = list(text = "time (milliseconds)"))  %>%
+      hc_plotOptions(boxplot = bp_opts)
+  )
+}
+```
+
+```{r bench_BoxPlot_05_01, echo=FALSE}
+bench_BoxPlot_05_01 <- structure(list(expr = structure(c(2L, 3L, 1L, 2L, 1L, 2L, 1L, 
+1L, 1L, 1L, 2L, 1L, 3L, 3L, 1L, 2L, 3L, 3L, 1L, 3L, 3L, 3L, 2L, 
+2L, 1L, 2L, 2L, 2L, 3L, 3L), .Label = c("hive_builtin", "translated_dplyr", 
+"spark_apply"), class = "factor"), time = c(510880300, 376238359100, 
+459216300, 453419200, 395843200, 449962100, 473031600, 397751400, 
+486350100, 448904100, 617108700, 430415400, 394811282400, 376320939300, 
+463248300, 407416100, 381020624800, 374471741200, 491423500, 
+377376787000, 381261598400, 372653408600, 472141400, 410673700, 
+495455800, 484246600, 430739500, 501344300, 397696923800, 373638794600
+)), class = c("microbenchmark", "data.frame"), row.names = c(NA, 
+-30L))
+
+bench_BoxPlot_05_01 <- makeBenchBoxPlot(
+  bench_BoxPlot_05_01,
+  "Simple column transformation on a small dataset"
+)
+```
+
+```{r bench_BoxPlot_05_02, echo=FALSE}
+bench_BoxPlot_05_02 <- structure(list(expr = structure(c(1L, 1L, 3L, 3L, 2L, 3L, 3L, 
+2L, 3L, 2L, 2L, 3L, 2L, 3L, 3L, 1L, 1L, 2L, 1L, 1L, 1L, 2L, 2L, 
+1L, 1L, 1L, 2L, 2L, 3L, 3L), .Label = c("hive_builtin", "translated_dplyr", 
+"spark_apply_arrow"), class = "factor"), time = c(543923600, 536695000, 
+4491369200, 4491221400, 565970200, 4497951400, 4681404100, 444475700, 
+4571029300, 870372900, 571960800, 4505926500, 555668900, 4543960300, 
+4557691500, 509572500, 559504200, 459730700, 510591200, 577023900, 
+501137200, 439105200, 570762800, 511996900, 544363800, 493934000, 
+557436300, 540233100, 4922310600, 4508517700)), class = c("microbenchmark", 
+"data.frame"), row.names = c(NA, -30L))
+bench_BoxPlot_05_02 <- makeBenchBoxPlot(bench_BoxPlot_05_02, "Simple column transformation on a small dataset")
+```

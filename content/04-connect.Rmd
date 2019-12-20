@@ -1,0 +1,60 @@
+# Connecting and using a local Spark instance
+
+The following code chunks will prepare the R session for us to be able to experiment with the code presented in the book. We will attach the needed R packages, initialize and connect to a local Spark instance and copy the weather and flights datasets from the nycflights13 package to the Spark instance such that we can work with them in our examples.
+
+
+## Packages and data
+
+We will be using the sparklyr package to interface with Spark and since this packages works very well with the dplyr package and its vocabulary, we will take advantage of the dplyr syntax and the pipe operator. As a source of data, we will use the nycflights13 package that conveniently provides airline data for flights departing New York City in 2013. 
+
+```{r r202_preparation}
+# Attach packages
+suppressPackageStartupMessages({
+  library(sparklyr)
+  library(dplyr)
+  library(nycflights13)
+})
+
+# Add an id column to the datasets
+weather <- nycflights13::weather %>%
+  mutate(id = 1L:nrow(nycflights13::weather)) %>% 
+  select(id, everything())
+
+flights <- nycflights13::flights %>%
+  mutate(id = 1L:nrow(nycflights13::flights)) %>% 
+  select(id, everything())
+```
+
+## Connecting to Spark and providing it with data
+
+As a second step, we will now connect to a Spark instance which will be running on our local machine and send the prepared data to the instance such that we can work with them in Spark using the `copy_to()` function. We assign the outputs of `copy_to()` to objects called `tbl_weather` and `tbl_flights`, which are references or link to the objects within Spark.
+
+```{r 202_connection}
+# Connect to a local Spark instance
+sc <- sparklyr::spark_connect(master = "local")
+
+# Copy the weather dataset to the instance
+tbl_weather <- dplyr::copy_to(
+  dest = sc, 
+  df = weather,
+  name = "weather",
+  overwrite = TRUE
+)
+
+# Copy the flights dataset to the instance
+tbl_flights <- dplyr::copy_to(
+  dest = sc, 
+  df = flights,
+  name = "flights",
+  overwrite = TRUE
+)
+```
+
+## First glance at the data
+
+To make sure our data are available in the Spark instance, we can look at the first few rows of the two datasets we have copied to Spark.
+
+```{r 202_glance}
+head(tbl_flights)
+head(tbl_weather)
+```

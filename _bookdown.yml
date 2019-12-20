@@ -1,0 +1,18 @@
+book_filename: "sparkfromr"
+delete_merged_file: true
+language:
+  ui:
+    chapter_name: "Chapter "
+output_dir: "_output"
+rmd_files: [
+  "content/00-benchmark-setup.Rmd",
+  "content/01-intro.Rmd",
+  "content/02-setup.Rmd",
+  "content/03-docker.Rmd",
+  "content/04-connect.Rmd",
+  "content/05-spark-r-1.Rmd",
+  "content/06-spark-r-dplyr-verbs.Rmd",
+  "content/07-spark-r-sql.Rmd",
+  "content/08-spark-r-invoke-scala.Rmd",
+  "content/09-spark-r-invoke-scala-2.Rmd"
+]

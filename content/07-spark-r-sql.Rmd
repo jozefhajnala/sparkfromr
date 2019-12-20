@@ -1,0 +1,229 @@
+# Using R to construct SQL queries and let Spark execute them
+
+In the [previous chapter](constructing-functions-by-piping-dplyr-verbs.html) of this series, we looked at writing R functions that can be executed directly by Spark without serialization overhead with a focus on writing functions as combinations of dplyr verbs and investigated how the SQL is generated and Spark plans created.
+
+In this chapter, we will look at how to write R functions that generate SQL queries that can be executed by Spark, how to execute them with DBI and how to achieve lazy SQL statements that only get executed when needed. We also briefly present wrapping these approaches into functions that can be combined with other Spark operations.
+
+## R functions as Spark SQL generators
+
+There are use cases where it is desirable to express the operations directly with SQL instead of combining dplyr verbs, for example when working within multi-language environments where re-usability is important. We can then send the SQL query directly to Spark to be executed. To create such queries, one option is to write R functions that work as query constructors.
+
+Again using a very simple example, a naive implementation of column normalization could look as follows. Note that the use of `SELECT *` is discouraged and only here for illustration purposes:
+
+```{r r203_define_normalize_sql}
+normalize_sql <- function(df, colName, newColName) {
+  paste0(
+    "SELECT",
+    "\n  ", df, ".*", ",",
+    "\n  (", colName, " - (SELECT avg(", colName, ") FROM ", df, "))",
+    " / ",
+    "(SELECT stddev_samp(", colName,") FROM ", df, ") as ", newColName,
+    "\n", "FROM ", df
+  )
+}
+```
+
+Using the `weather` dataset would then yield the following SQL query when normalizing the `temp` column:
+
+```{r r203_test_normalize_sql}
+normalize_temp_query <- normalize_sql("weather", "temp", "normTemp")
+cat(normalize_temp_query)
+```
+
+Now that we have the query created, we can look at how to send it to Spark for execution.
+
+## Executing the generated queries via Spark
+
+### Using DBI as the interface
+
+The R package DBI provides an interface for communication between R and relational database management systems. We can simply use the `dbGetQuery()` function to execute our query, for instance:
+
+```{r r203_getquery_normalize_sql}
+res <- DBI::dbGetQuery(sc, statement = normalize_temp_query)
+head(res)
+```
+
+As we might have noticed thanks to the way the result is printed, a standard data frame is returned, as opposed to tibbles returned by most sparklyr operations.
+
+> It is important to note that using `dbGetQuery()` *automatically computes and collects* the results to the R session. This is in contrast with the dplyr approach which constructs the query and only collects the results to the R session when `collect()` is called, or computes them when `compute()` is called.
+
+We will now examine 2 options to use the prepared query lazily and without collecting the results into the R session.
+
+### Invoking sql on a Spark session object
+
+Without going into further details on the `invoke()` functionality of sparklyr which we will focus on in the fourth installment of the series, if the desire is to have a "lazy" SQL that does not get automatically computed and collected when called from R, we can invoke a [`sql` method](https://spark.apache.org/docs/latest/api/scala/index.html#org.apache.spark.sql.SparkSession@sql(sqlText:String):org.apache.spark.sql.DataFrame) on a SparkSession class object.
+
+The method takes a string SQL query as input and processes it using Spark, returning the result as a Spark DataFrame. This gives us the ability to only compute and collect the results when desired:
+
+```{r r203_invoke_normalize_sql}
+# Use the query "lazily" without execution:
+normalized_lazy_ds <- sc %>%
+  spark_session() %>%
+  invoke("sql",  normalize_temp_query)
+normalized_lazy_ds
+
+# Collect when needed:
+normalized_lazy_ds %>% collect()
+```
+
+### Using tbl with dbplyr's sql
+
+The above method gives us a reference to a Java object as a result, which might be less intuitive to work with for R users. We can also opt to use dbplyr's `sql()` function in combination with `tbl()` to get a more familiar result.
+
+Note that when printing the below `normalized_lazy_tbl`, the query gets partially executed to provide the first few rows. Only when `collect()` is called the entire set is retrieved to the R session:
+
+```{r r203_sql_tbl_normalize_sql}
+# Nothing is executed yet
+normalized_lazy_tbl <- normalize_temp_query %>%
+  dbplyr::sql() %>%
+  tbl(sc, .)
+
+# Print the first few rows
+normalized_lazy_tbl
+
+# Collect the entire result to the R session and print
+normalized_lazy_tbl %>% collect()
+```
+
+### Wrapping the tbl approach into functions
+
+In the approach above we provided `sc` in the call to `tbl()`. When wrapping such processes into a function, it might however be useful to take the specific DataFrame reference as an input instead of the generic Spark connection reference.
+
+In that case, we can use the fact that the connection reference is also stored in the DataFrame reference, in the `con` sub-element of the `src` element. For instance, looking at our `tbl_weather`:
+
+```{r r203_show_src_con}
+class(tbl_weather[["src"]][["con"]])
+```
+
+Putting this together, we can create a simple wrapper function that lazily sends a SQL query to be processed on a particular Spark DataFrame reference:
+
+```{r r203_define_lazy_spark_query}
+lazy_spark_query <- function(tbl, qry) {
+  qry %>%
+    dbplyr::sql() %>%
+    dplyr::tbl(tbl[["src"]][["con"]], .)
+}
+```
+
+And use it to do the same as we did above with a single function call:
+
+```{r r203_test_lazy_spark_query}
+lazy_spark_query(tbl_weather, normalize_temp_query) %>% 
+  collect()
+```
+
+## Combining multiple approaches and functions into lazy datasets
+
+The power of Spark partly comes from the lazy execution and we can take advantage of this in ways that are not immediately obvious. Consider the following function we have shown previously:
+
+```{r r203_show_lazy_spark_query}
+lazy_spark_query
+```
+
+Since the output of this function without collection is actually only a translated SQL statement, we can take that output and keep combinining it with other operations, for instance:
+
+```{r r203_combine_lazy_spark_query}
+qry <- normalize_sql("flights", "dep_delay", "dep_delay_norm")
+lazy_spark_query(tbl_flights, qry) %>%
+  group_by(origin) %>%
+  summarise(mean(dep_delay_norm)) %>%
+  collect()
+```
+
+The crucial advantage is that even though the `lazy_spark_query` would return the entire updated weather dataset when collected stand-alone, in combination with other operations Spark first figures out how to execute all the operations together efficiently and only then physically executes them and returns only the grouped and aggregated data to the R session.
+
+We can therefore effectively combine multiple approaches to interfacing with Spark while still keeping the benefit of retrieving only very small, aggregated amounts of data to the R session. The effect is quite significant even with a dataset as small as `flights` (336,776 rows of 19 columns) and with a local Spark instance. The chart below compares executing a query lazily, aggregating within Spark and only retrieving the aggregated data, versus retrieving first and aggregating locally. The third boxplot shows the cost of pure collection on the query itself:
+
+```{r r203_bench_lazy_spark_query, eval=FALSE, echo=TRUE}
+bench <- microbenchmark::microbenchmark(
+  times = 20,
+  collect_late = lazy_spark_query(tbl_flights, qry) %>%
+    group_by(origin) %>%
+    summarise(mean(dep_delay_norm)) %>%
+    collect(),
+  collect_first = lazy_spark_query(tbl_flights, qry) %>%
+    collect() %>% 
+    group_by(origin) %>%
+    summarise(mean(dep_delay_norm)),
+  collect_only = lazy_spark_query(tbl_flights, qry) %>%
+    collect()
+)
+```
+
+
+```{r r203_show_bench_lazy_spark_query, echo=FALSE, eval=TRUE, results='asis'}
+bench <- structure(list(expr = structure(c(2L, 2L, 1L, 3L, 2L, 3L, 2L, 
+1L, 1L, 3L, 2L, 1L, 1L, 1L, 3L, 3L, 2L, 2L, 1L, 1L, 2L, 3L, 3L, 
+1L, 1L, 2L, 3L, 1L, 2L, 3L, 3L, 2L, 3L, 2L, 3L, 2L, 1L, 2L, 3L, 
+2L, 3L, 3L, 2L, 2L, 1L, 1L, 3L, 2L, 2L, 1L, 3L, 1L, 1L, 1L, 1L, 
+3L, 3L, 1L, 3L, 2L), .Label = c("collect_late", "collect_first", 
+"collect_only"), class = "factor"), time = c(3743310309, 3223410279, 
+1044144147, 3396105688, 3259009403, 3458107819, 3882873078, 987921191, 
+1052327709, 3254559927, 3422277768, 963818627, 1098933644, 1368396709, 
+3015113993, 3392187053, 3546769923, 3287724865, 949457757, 999673408, 
+3195632596, 3410260806, 3517991338, 969115114, 1128291383, 3209551081, 
+3504943483, 1054956076, 3253958947, 3749991613, 3244917078, 3440369754, 
+3536388227, 3305261833, 3840223595, 3290319716, 999788409, 4088377885, 
+3073718366, 3934174756, 3105406492, 3890604758, 3416894415, 3466927632, 
+951879765, 1054456634, 3536660257, 3331910720, 3946624407, 976478264, 
+3245738276, 1230590788, 1036213866, 1226714171, 1155273334, 3202357470, 
+3523546056, 1075064236, 3260423207, 3878469006)), .Names = c("expr", 
+"time"), row.names = c(NA, -60L), class = c("microbenchmark", 
+"data.frame"))
+bench_BoxPlot <- makeBenchBoxPlot(bench, "Combine and collect late and small vs. early and bigger")
+jhaddins::makeHighChart(bench_BoxPlot, chartname = "r203-01-bench-late-collect", docat = TRUE)
+```
+
+## Where SQL can be better than dbplyr translation
+
+### When a translation is not there
+
+We have discussed in the [first part](https://jozef.io/r201-spark-r-1/#an-r-function-not-translated-to-spark-sql) that the set of operations translated to Spark SQL via dbplyr may not cover all possible use cases. In such a case, the option to write SQL directly is very useful.
+
+### When translation does not provide expected results
+
+In some instances using dbplyr to translate R operations to Spark SQL can lead to unexpected results. As one example, consider the following integer division on a column of a local data frame.
+
+```{r r203_int_div_local}
+# id_div_5 is as expected
+weather %>%
+  mutate(id_div_5 = id %/% 5L) %>%
+  select(id, id_div_5)
+```
+
+As expected, we get the result of integer division in the `id_div_5` column. However, applying the very same operation on a Spark DataFrame yields unexpected results:
+
+```{r r203_int_div_spark}
+# id_div_5 is normal division, not integer division
+tbl_weather %>%
+  mutate(id_div_5 = id %/% 5L) %>%
+  select(id, id_div_5)
+```
+
+This is due to the fact that translation to integer division is quite difficult to implement: https://github.com/tidyverse/dbplyr/issues/108. We could certainly figure our a way to fix this particular issue, but the workarounds may prove inefficient:
+
+```{r r203_int_div_spark_workaround}
+tbl_weather %>%
+  mutate(id_div_5 = as.integer(id %/% 5L)) %>%
+  select(id, id_div_5)
+
+# Not too efficient:
+tbl_weather %>%
+  mutate(id_div_5 = as.integer(id %/% 5L)) %>%
+  select(id, id_div_5) %>%
+  explain()
+```
+
+Using SQL and the knowledge that Hive does provide a built-in [`DIV` arithmetic operator](https://cwiki.apache.org/confluence/display/Hive/LanguageManual+UDF#LanguageManualUDF-ArithmeticOperators), we can get the desired results very simply and efficiently with writing SQL:
+
+```{r r203_int_div_spark_sql}
+"SELECT `id`, `id` DIV 5 `id_div_5` FROM `weather`" %>%
+  dbplyr::sql() %>%
+  tbl(sc, .)
+```
+
+Even though the numeric value of the results is correct here, we may still notice that the class of the returned `id_div_5` column is actually numeric instead of integer. Such is the life of developers using data processing interfaces.
+
+### When portability is important
+
+Since the languages that provide interfaces to Spark are not limited to R and multi-language setups are quite common, another reason to use SQL statements directly is the portability of such solutions. A SQL statement can be executed by interfaces provided for all languages - Scala, Java, and Python, without the need to rely on R-specific packages such as dbplyr.

@@ -1,0 +1,18 @@
+--- 
+title: "Using Spark from R for performance with arbitrary code"
+author: "Jozef Hajnala"
+date: "`r Sys.Date()`"
+site: bookdown::bookdown_site
+documentclass: book
+biblio-style: apalike
+link-citations: yes
+description: "This bookdown publication attempts to provide practical insights into using the sparklyr interface to gain the benefits of Apache Spark while still retaining the ability to use R code organized in custom-built functions and packages."
+---
+
+# Introduction
+
+Apache Spark is a popular open-source analytics engine for big data processing and thanks to the sparklyr and SparkR packages, the power of Spark is also available to R users.
+
+![Apache Spark and R logos](../img/r201-01-spark-and-r.png)
+
+This bookdown publication attempts to provide practical insights into using the sparklyr interface to gain the benefits of Apache Spark while still retaining the ability to use R code organized in custom-built functions and packages.

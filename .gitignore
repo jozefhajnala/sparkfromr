@@ -1,0 +1,8 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+_output/*
+logs/*
+content/logs/*
+content/spark-warehouse/*

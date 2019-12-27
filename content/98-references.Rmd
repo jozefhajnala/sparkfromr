@@ -1,11 +1,8 @@
 # References
 
-## Apache Arrow
+## dplyr syntax
 
-- Homepage of [Apache Arrow](https://arrow.apache.org/)
-- R package [arrow on CRAN](https://cran.r-project.org/package=arrow)
-- Arrow C++ library [installation guide](https://arrow.apache.org/install/)
-- R Apache Arrow [on GitHub](https://github.com/apache/arrow/tree/master/r)
+- Overview of the [dplyr syntax](https://dplyr.tidyverse.org/)
 
 ## DBI, Spark SQL, Hive
 
@@ -14,11 +11,17 @@
 
 ## Docker
 
-## dplyr syntax
-
-- Overview of the [dplyr syntax](https://dplyr.tidyverse.org/)
+- [Get started with Docker](https://docs.docker.com/get-started/)
+- [The Rocker Project](https://www.rocker-project.org/) - Docker Containers for the R Environment
 
 ## Java, Scala and friends
 
 - Wikipedia's article on [Method Chaining](https://en.wikipedia.org/wiki/Method_chaining)
 - Stackoverflow [discussion of reflection](https://stackoverflow.com/questions/37628/what-is-reflection-and-why-is-it-useful)
+
+## Apache Arrow
+
+- Homepage of [Apache Arrow](https://arrow.apache.org/)
+- Arrow C++ library [installation guide](https://arrow.apache.org/install/)
+- R package [arrow on CRAN](https://cran.r-project.org/package=arrow)
+- R package [arrow on GitHub](https://github.com/apache/arrow/tree/master/r)

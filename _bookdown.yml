@@ -14,5 +14,7 @@ rmd_files: [
   "content/06-spark-r-dplyr-verbs.Rmd",
   "content/07-spark-r-sql.Rmd",
   "content/08-spark-r-invoke-scala.Rmd",
-  "content/09-spark-r-invoke-scala-2.Rmd"
+  "content/09-spark-r-invoke-scala-2.Rmd",
+  "content/98-references.Rmd",
+  "content/99-footnotes.Rmd"
 ]

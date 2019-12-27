@@ -53,7 +53,7 @@ We also one see extra operation after invoking the describe method: `sdf_registe
 And indeed, we can see that the wrapper `sdf_describe()` provided by the sparklyr package itself works in a very similar fashion:
 
 ```{r r204_invoke_preview_sdf_describe}
-sparklyr::sdf_describe
+body(sparklyr::sdf_describe)
 ```
 
 

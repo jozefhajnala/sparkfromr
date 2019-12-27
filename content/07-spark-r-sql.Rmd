@@ -1,8 +1,10 @@
 # Using R to construct SQL queries and let Spark execute them
 
-> I feel honoured to be the second to whom you turn. What have I done to deserve to be so high on your list?
->
-> _Yennefer of Vengerberg_
+```{block, type='wizardry'}
+I feel honoured to be the second to whom you turn. What have I done to deserve to be so high on your list?
+
+* Yennefer of Vengerberg
+```
 
 In the [previous chapter](constructing-functions-by-piping-dplyr-verbs.html) of this series, we looked at writing R functions that can be executed directly by Spark without serialization overhead with a focus on writing functions as combinations of dplyr verbs and investigated how the SQL is generated and Spark plans created.
 

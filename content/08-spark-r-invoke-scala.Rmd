@@ -1,8 +1,10 @@
 # Using the lower-level invoke API to manipulate Spark's Java objects from R
 
-> There will be no foolish wand-waving or silly incantations in this class.
->
-> _Severus Snape_
+```{block, type='wizardry'}
+There will be no foolish wand-waving or silly incantations in this class.
+
+* Severus Snape
+```
 
 In the previous chapters, we have shown how to write functions as both [combinations of dplyr verbs](constructing-functions-by-piping-dplyr-verbs.html) and [SQL query generators](using-r-to-construct-sql-queries-and-let-spark-execute-them.html) that can be executed by Spark, how to execute them with DBI and how to achieve lazy SQL statements that only get executed when needed.
 

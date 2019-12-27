@@ -142,7 +142,7 @@ jhaddins::makeHighChart(bench_BoxPlot_05_01, chartname = "r201-01-bench-spark-ap
 
 Note that the absolute values here will vary based on the setup, the important message is in the relative differences.
 
-> We can see that the operations executed via the SQL translation mechanism of dbplyr were executed in around *0.5 seconds* while those via spark_apply took orders of magnitude longer - more than *6 minutes*.
+We can see that the operations executed via the SQL translation mechanism of dbplyr were executed in around *0.5 seconds* while those via spark_apply took orders of magnitude longer - more than *6 minutes*.
 
 
 ### What happens when we use custom functions with `spark_apply`
@@ -179,7 +179,7 @@ An important question to answer with regards to performance then is what amount 
 
 Our benchmarks have shown that using `spark_apply()` does not scale well and the penalty of the bottleneck in performance caused by serialization, deserialization, and transfer is too high. 
 
-> To partially mitigate this we can take advantage of [Apache Arrow](https://arrow.apache.org/), a cross-language development platform for in-memory data that specifies a standardized language-independent columnar memory format for flat and hierarchical data.
+To partially mitigate this we can take advantage of [Apache Arrow](https://arrow.apache.org/), a cross-language development platform for in-memory data that specifies a standardized language-independent columnar memory format for flat and hierarchical data.
 
 By adding support for Arrow in sparklyr, it makes Spark perform the row-format to column-format conversion in parallel in Spark, data is then transferred through the socket but no custom serialization takes place and all the R process needs to do is copy this data from the socket into its heap, transform it and copy it back to the socket connection.
 
@@ -205,7 +205,7 @@ jhaddins::makeHighChart(bench_BoxPlot_05_02, chartname = "r201-02-bench-spark-ap
 
 Adding Arrow to the mix certainly significantly improved the performance of our example code, but is still quite slow compared to the native approach. Based on the above, we could conclude that
 
-> Performance benefits are present mainly when all the computation is performed within Spark and R serves merely as a "messaging agent", sending commands to Spark to be executed. If there are object serialization and transfer of larger objects present, performance is strongly impacted.
+Performance benefits are present mainly when all the computation is performed within Spark and R serves merely as a "messaging agent", sending commands to Spark to be executed. If there are object serialization and transfer of larger objects present, performance is strongly impacted.
 
 The take-home message from this exercise is that we should strive to only use R code that can be executed within the Spark instance. If we need some data retrieved, it is advisable that this is data that was previously heavily aggregated within Spark and only a small amount is transferred to the R session.
 

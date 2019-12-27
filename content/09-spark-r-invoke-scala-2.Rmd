@@ -1,8 +1,10 @@
 # Exploring the invoke API from R with Java reflection and examining invokes with logs
 
-> Then darkness took me, and I strayed out of thought and time, and I wandered far on roads that I will not tell
-> 
-> _Gandalf the White_
+```{block, type='wizardry'}
+Then darkness took me, and I strayed out of thought and time, and I wandered far on roads that I will not tell
+
+* Gandalf the White
+```
 
 In the previous chapters, we have shown how to write functions as both [combinations of dplyr verbs](https://jozef.io/r202-spark-r-dplyr-verbs/), [SQL query generators](https://jozef.io/r203-spark-r-sql/) that can be executed by Spark and [how to use the lower-level API](https://jozef.io/r204-spark-r-invoke-scala/) to invoke methods on Java object references from R.
 

@@ -15,8 +15,9 @@ Apache Spark is a popular open-source analytics engine for big data processing a
 
 This bookdown publication attempts to provide practical insights into using the sparklyr interface to gain the benefits of Apache Spark while still retaining the ability to use R code organized in custom-built functions and packages.
 
-```{block, type='wizardry'}
-This is your realm, and the heart of the greater realm that shall be
 
-* Gandalf the White
+```{block, type='wizardry'}
+Differences of habit and language are nothing at all if our aims are identical and our hearts are open
+
+* Albus Dumbledore
 ```

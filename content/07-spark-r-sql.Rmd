@@ -1,4 +1,4 @@
-# Using R to construct SQL queries and let Spark execute them
+# Constructing SQL and executing it with Spark
 
 ```{block, type='wizardry'}
 I feel honoured to be the second to whom you turn. What have I done to deserve to be so high on your list?

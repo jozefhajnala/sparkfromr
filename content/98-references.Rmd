@@ -1,13 +1,23 @@
-# References
+# References and resources
+
+## Getting started with sparklyr
+
+- The [Getting Started chapter](https://therinspark.com/starting.html) of the Mastering Spark with R book
+- The [Prerequisites appendix ](https://therinspark.com/appendix.html#appendix-prerequisites) f the Mastering Spark with R book
+- RStudio's [spark website](https://spark.rstudio.com/#installation)
 
 ## dplyr syntax
 
 - Overview of the [dplyr syntax](https://dplyr.tidyverse.org/)
+- The [Data transformation](https://r4ds.had.co.nz/transform.html) chapter of R for Data Science
 
 ## DBI, Spark SQL, Hive
 
+- [Spark SQL, Built-in Functions](https://spark.apache.org/docs/latest/api/sql/index.html)
 - Documentation on [Hive Operators and User-Defined Functions](https://cwiki.apache.org/confluence/display/Hive/LanguageManual+UDF) website
 - The [DBI package](https://cran.r-project.org/package=DBI) on CRAN
+- The [Introduction to DBI](https://db.rstudio.com/dbi/) page of Databases using R
+- The [Overview](https://dbplyr.tidyverse.org/) page of dbplyr documentation
 
 ## Docker
 
@@ -16,6 +26,8 @@
 
 ## Java, Scala and friends
 
+- Spark [Scala API](https://spark.apache.org/docs/latest/api/scala/index.html) documentation
+- Spark [Java API](https://spark.apache.org/docs/latest/api/java/index.html) documentation
 - Wikipedia's article on [Method Chaining](https://en.wikipedia.org/wiki/Method_chaining)
 - Stackoverflow [discussion of reflection](https://stackoverflow.com/questions/37628/what-is-reflection-and-why-is-it-useful)
 
@@ -25,3 +37,9 @@
 - Arrow C++ library [installation guide](https://arrow.apache.org/install/)
 - R package [arrow on CRAN](https://cran.r-project.org/package=arrow)
 - R package [arrow on GitHub](https://github.com/apache/arrow/tree/master/r)
+
+## Physical Books
+
+- [Spark: The Definitive Guide](https://www.oreilly.com/library/view/spark-the-definitive/9781491912201/) by Matei Zaharia, Bill Chambers
+- [Mastering Spark with R](https://www.oreilly.com/library/view/mastering-spark-with/9781492046363/) by Edgar Ruiz, Kevin Kuo, Javier Luraschi
+

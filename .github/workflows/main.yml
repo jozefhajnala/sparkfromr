@@ -1,0 +1,11 @@
+name: CI
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Render Book
+      run: sh build/sparkfromr_render_test.sh

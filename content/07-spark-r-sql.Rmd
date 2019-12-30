@@ -1,11 +1,5 @@
 # Constructing SQL and executing it with Spark
 
-```{block, type='wizardry'}
-I feel honoured to be the second to whom you turn. What have I done to deserve to be so high on your list?
-
-* Yennefer of Vengerberg
-```
-
 In the [previous chapter](constructing-functions-by-piping-dplyr-verbs.html) of this series, we looked at writing R functions that can be executed directly by Spark without serialization overhead with a focus on writing functions as combinations of dplyr verbs and investigated how the SQL is generated and Spark plans created.
 
 In this chapter, we will look at how to write R functions that generate SQL queries that can be executed by Spark, how to execute them with DBI and how to achieve lazy SQL statements that only get executed when needed. We also briefly present wrapping these approaches into functions that can be combined with other Spark operations.
@@ -116,68 +110,6 @@ And use it to do the same as we did above with a single function call:
 ```{r r203_test_lazy_spark_query}
 lazy_spark_query(tbl_weather, normalize_temp_query) %>% 
   collect()
-```
-
-## Combining multiple approaches and functions into lazy datasets
-
-The power of Spark partly comes from the lazy execution and we can take advantage of this in ways that are not immediately obvious. Consider the following function we have shown previously:
-
-```{r r203_show_lazy_spark_query}
-lazy_spark_query
-```
-
-Since the output of this function without collection is actually only a translated SQL statement, we can take that output and keep combinining it with other operations, for instance:
-
-```{r r203_combine_lazy_spark_query}
-qry <- normalize_sql("flights", "dep_delay", "dep_delay_norm")
-lazy_spark_query(tbl_flights, qry) %>%
-  group_by(origin) %>%
-  summarise(mean(dep_delay_norm)) %>%
-  collect()
-```
-
-The crucial advantage is that even though the `lazy_spark_query` would return the entire updated weather dataset when collected stand-alone, in combination with other operations Spark first figures out how to execute all the operations together efficiently and only then physically executes them and returns only the grouped and aggregated data to the R session.
-
-We can therefore effectively combine multiple approaches to interfacing with Spark while still keeping the benefit of retrieving only very small, aggregated amounts of data to the R session. The effect is quite significant even with a dataset as small as `flights` (336,776 rows of 19 columns) and with a local Spark instance. The chart below compares executing a query lazily, aggregating within Spark and only retrieving the aggregated data, versus retrieving first and aggregating locally. The third boxplot shows the cost of pure collection on the query itself:
-
-```{r r203_bench_lazy_spark_query, eval=FALSE, echo=TRUE}
-bench <- microbenchmark::microbenchmark(
-  times = 20,
-  collect_late = lazy_spark_query(tbl_flights, qry) %>%
-    group_by(origin) %>%
-    summarise(mean(dep_delay_norm)) %>%
-    collect(),
-  collect_first = lazy_spark_query(tbl_flights, qry) %>%
-    collect() %>% 
-    group_by(origin) %>%
-    summarise(mean(dep_delay_norm)),
-  collect_only = lazy_spark_query(tbl_flights, qry) %>%
-    collect()
-)
-```
-
-
-```{r r203_show_bench_lazy_spark_query, echo=FALSE, eval=TRUE, results='asis'}
-bench <- structure(list(expr = structure(c(2L, 2L, 1L, 3L, 2L, 3L, 2L, 
-1L, 1L, 3L, 2L, 1L, 1L, 1L, 3L, 3L, 2L, 2L, 1L, 1L, 2L, 3L, 3L, 
-1L, 1L, 2L, 3L, 1L, 2L, 3L, 3L, 2L, 3L, 2L, 3L, 2L, 1L, 2L, 3L, 
-2L, 3L, 3L, 2L, 2L, 1L, 1L, 3L, 2L, 2L, 1L, 3L, 1L, 1L, 1L, 1L, 
-3L, 3L, 1L, 3L, 2L), .Label = c("collect_late", "collect_first", 
-"collect_only"), class = "factor"), time = c(3743310309, 3223410279, 
-1044144147, 3396105688, 3259009403, 3458107819, 3882873078, 987921191, 
-1052327709, 3254559927, 3422277768, 963818627, 1098933644, 1368396709, 
-3015113993, 3392187053, 3546769923, 3287724865, 949457757, 999673408, 
-3195632596, 3410260806, 3517991338, 969115114, 1128291383, 3209551081, 
-3504943483, 1054956076, 3253958947, 3749991613, 3244917078, 3440369754, 
-3536388227, 3305261833, 3840223595, 3290319716, 999788409, 4088377885, 
-3073718366, 3934174756, 3105406492, 3890604758, 3416894415, 3466927632, 
-951879765, 1054456634, 3536660257, 3331910720, 3946624407, 976478264, 
-3245738276, 1230590788, 1036213866, 1226714171, 1155273334, 3202357470, 
-3523546056, 1075064236, 3260423207, 3878469006)), .Names = c("expr", 
-"time"), row.names = c(NA, -60L), class = c("microbenchmark", 
-"data.frame"))
-bench_BoxPlot <- makeBenchBoxPlot(bench, "Combine and collect late and small vs. early and bigger")
-jhaddins::makeHighChart(bench_BoxPlot, chartname = "r203-01-bench-late-collect", docat = TRUE)
 ```
 
 ## Where SQL can be better than dbplyr translation

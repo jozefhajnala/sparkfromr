@@ -1,1 +1,49 @@
-# Combining approaches
+# Combining approaches into lazy datasets
+
+<script src="static/js/highcharts.js"></script>
+<script src="static/js/highcharts-more.js"></script>
+
+The power of Spark partly comes from the lazy execution and we can take advantage of this in ways that are not immediately obvious. Consider the following function we have shown previously:
+
+```{r r203_show_lazy_spark_query}
+lazy_spark_query
+```
+
+Since the output of this function without collection is actually only a translated SQL statement, we can take that output and keep combinining it with other operations, for instance:
+
+```{r r203_combine_lazy_spark_query}
+qry <- normalize_sql("flights", "dep_delay", "dep_delay_norm")
+lazy_spark_query(tbl_flights, qry) %>%
+  group_by(origin) %>%
+  summarise(mean(dep_delay_norm)) %>%
+  collect()
+```
+
+The crucial advantage is that even though the `lazy_spark_query` would return the entire updated weather dataset when collected stand-alone, in combination with other operations Spark first figures out how to execute all the operations together efficiently and only then physically executes them and returns only the grouped and aggregated data to the R session.
+
+We can therefore effectively combine multiple approaches to interfacing with Spark while still keeping the benefit of retrieving only very small, aggregated amounts of data to the R session. The effect is quite significant even with a dataset as small as `flights` (336,776 rows of 19 columns) and with a local Spark instance. The chart below compares executing a query lazily, aggregating within Spark and only retrieving the aggregated data, versus retrieving first and aggregating locally. The third boxplot shows the cost of pure collection on the query itself:
+
+```{r r203_bench_lazy_spark_query, eval=FALSE, echo=TRUE}
+bench <- microbenchmark::microbenchmark(
+  times = 20,
+  collect_late = lazy_spark_query(tbl_flights, qry) %>%
+    group_by(origin) %>%
+    summarise(mean(dep_delay_norm)) %>%
+    collect(),
+  collect_first = lazy_spark_query(tbl_flights, qry) %>%
+    collect() %>% 
+    group_by(origin) %>%
+    summarise(mean(dep_delay_norm)),
+  collect_only = lazy_spark_query(tbl_flights, qry) %>%
+    collect()
+)
+```
+
+
+```{r r203_show_bench_lazy_spark_query, echo=FALSE, eval=TRUE, results='asis'}
+jhaddins::makeHighChart(
+  bench_BoxPlot_10_01,
+  chartname = "r203-01-bench-late-collect", 
+  docat = TRUE
+)
+```

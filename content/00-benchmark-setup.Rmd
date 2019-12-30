@@ -61,5 +61,48 @@ bench_BoxPlot_05_02 <- structure(list(expr = structure(c(1L, 1L, 3L, 3L, 2L, 3L,
 501137200, 439105200, 570762800, 511996900, 544363800, 493934000, 
 557436300, 540233100, 4922310600, 4508517700)), class = c("microbenchmark", 
 "data.frame"), row.names = c(NA, -30L))
-bench_BoxPlot_05_02 <- makeBenchBoxPlot(bench_BoxPlot_05_02, "Simple column transformation on a small dataset")
+
+bench_BoxPlot_05_02 <- makeBenchBoxPlot(
+  bench_BoxPlot_05_02,
+  "Simple column transformation on a small dataset"
+)
+```
+
+
+```{r bench_BoxPlot_07_01, echo=FALSE}
+bench_BoxPlot_10_01 <- structure(
+  list(
+    expr = structure(
+      c(
+        2L, 2L, 1L, 3L, 2L, 3L, 2L, 1L, 1L, 3L, 2L,
+        1L, 1L, 1L, 3L, 3L, 2L, 2L, 1L, 1L, 2L, 3L, 3L, 
+        1L, 1L, 2L, 3L, 1L, 2L, 3L, 3L, 2L, 3L, 2L, 3L, 2L, 1L, 2L, 3L, 
+        2L, 3L, 3L, 2L, 2L, 1L, 1L, 3L, 2L, 2L, 1L, 3L, 1L, 1L, 1L, 1L, 
+        3L, 3L, 1L, 3L, 2L
+      ),
+      .Label = c("collect_late", "collect_first", "collect_only"),
+      class = "factor"
+    ),
+    time = c(
+      3743310309, 3223410279, 1044144147, 3396105688, 3259009403, 3458107819,
+      3882873078, 987921191, 1052327709, 3254559927, 3422277768, 963818627,
+      1098933644, 1368396709, 3015113993, 3392187053, 3546769923, 3287724865,
+      949457757, 999673408, 3195632596, 3410260806, 3517991338, 969115114,
+      1128291383, 3209551081, 3504943483, 1054956076, 3253958947, 3749991613, 
+      3244917078, 3440369754, 3536388227, 3305261833, 3840223595, 3290319716,
+      999788409, 4088377885, 3073718366, 3934174756, 3105406492, 3890604758,
+      3416894415, 3466927632, 951879765, 1054456634, 3536660257, 3331910720,
+      3946624407, 976478264, 3245738276, 1230590788, 1036213866, 1226714171,
+      1155273334, 3202357470, 3523546056, 1075064236, 3260423207, 3878469006
+    )
+  ),
+  .Names = c("expr", "time"),
+  row.names = c(NA, -60L),
+  class = c("microbenchmark", "data.frame")
+)
+
+bench_BoxPlot_10_01 <- makeBenchBoxPlot(
+  bench_BoxPlot_10_01,
+  "Combine and collect late and small vs. early and bigger"
+)
 ```

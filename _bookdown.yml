@@ -6,18 +6,18 @@ language:
 output_dir: "_output"
 rmd_files: [
   "index.Rmd",
-  "content/00-benchmark-setup.Rmd",
-  "content/01-knitr-hooks-setup.Rmd",
-  "content/02-setup.Rmd",
-  "content/03-docker.Rmd",
-  "content/04-connect.Rmd",
-  "content/05-spark-r-1.Rmd",
-  "content/051-spark-apply.Rmd",
-  "content/06-spark-r-dplyr-verbs.Rmd",
-  "content/07-spark-r-sql.Rmd",
-  "content/08-spark-r-invoke-scala.Rmd",
-  "content/09-spark-r-invoke-scala-2.Rmd",
-  "content/10-combining-approaches.Rmd",
-  "content/98-references.Rmd",
-  "content/99-footnotes.Rmd"
+  "content/000-setup-benchmarks.Rmd",
+  "content/001-setup-knitr-hooks.Rmd",
+  "content/100-setting-up-manual.Rmd",
+  "content/101-setting-up-docker.Rmd",
+  "content/102-connecting-to-local.Rmd",
+  "content/200-communication-w-sparkly.Rmd",
+  "content/210-spark-apply.Rmd",
+  "content/220-dplyr-verbs.Rmd",
+  "content/221-sql.Rmd",
+  "content/230-invoke.Rmd",
+  "content/231-invoke-reflection-logging.Rmd",
+  "content/240-combining-approaches.Rmd",
+  "content/400-references.Rmd",
+  "content/410-footnotes.Rmd"
 ]

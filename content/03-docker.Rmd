@@ -1,6 +1,6 @@
 # Using a ready-made Docker Image
 
-For the purpose of this book, a [Docker image](https://hub.docker.com/repository/docker/jozefhajnala/sparkfromr) was built which you can use to experiment in the following ways by running one of the commands below within a terminal. If you are using RStudio 1.1 or newer, [Terminal functionality](https://jozef.io/r905-rstudio-terminal/) is built into RStudio itself.
+For the purpose of this book, a [Docker image](https://hub.docker.com/repository/docker/jozefhajnala/sparkfromr) was built which you can use to run all the code chunks present in it withouth issues.
 
 ## Installing Docker
 
@@ -22,14 +22,15 @@ Now we look at how we use the image in practice in a few ways.
 
 ### Interactively with RStudio
 
-Running the following line of code in a terminal should create a container and expose RStudio for use:
+Running the following line of code in a terminal should create a container and expose RStudio for use. If you are using RStudio 1.1 or newer, the [Terminal functionality](https://jozef.io/r905-rstudio-terminal/) is built into RStudio itself.
+
 
 ```{bash r201_docker_run_rstudio, eval=FALSE}
 # Your can replace pass with a password of your choice
 docker run -d -p 8787:8787 -e PASSWORD=pass --name rstudio jozefhajnala/sparkfromr:latest
 ```
 
-Open your favourite web browser such as Google Chrome or Firefox and navigate to http://localhost:8787. You should be greeted by the RStudio login screen and you can use
+After running the above line, open your favourite web browser such as Google Chrome or Firefox and navigate to http://localhost:8787. You should be greeted by the RStudio login screen where you can use the following to login:
 
 - Username: `rstudio`
 - Password: `pass` (or the one you chose above)

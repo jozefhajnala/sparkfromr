@@ -27,7 +27,9 @@ flights <- nycflights13::flights %>%
 
 ## Connecting to Spark and providing it with data
 
-As a second step, we will now connect to a Spark instance which will be running on our local machine and send the prepared data to the instance such that we can work with them in Spark using the `copy_to()` function. We assign the outputs of `copy_to()` to objects called `tbl_weather` and `tbl_flights`, which are references or link to the objects within Spark.
+As a second step, we will now connect to a Spark instance which will be running on our local machine and send the prepared data to the instance using the `copy_to()` function such that we can work with them in Spark.
+
+We assign the outputs of `copy_to()` to objects called `tbl_weather` and `tbl_flights`, which are references to the DataFrame objects within Spark.
 
 ```{r 202_connection}
 # Connect to a local Spark instance
@@ -52,7 +54,7 @@ tbl_flights <- dplyr::copy_to(
 
 ## First glance at the data
 
-To make sure our data are available in the Spark instance, we can look at the first few rows of the two datasets we have copied to Spark.
+To make sure our datasets are available in the Spark instance, we can look at the first few rows of the two datasets we have copied to Spark. Notice how the print shows `Source: spark<?> [?? x`, telling us that the data inded comes from a Spark instance and the data frames have an unknown amount of rows. This is because Spark will do minimal work to show us just the first 6 rows, instead of going though the entire dataset.
 
 ```{r 202_glance}
 head(tbl_flights)

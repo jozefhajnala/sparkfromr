@@ -108,7 +108,7 @@ spark_conf_methods[["getAll"]]
 # Invoke the `getAll` method and look at part of the result
 spark_confs <- spark_conf %>% invoke("getAll")
 spark_confs <- vapply(spark_confs, invoke, "toString", FUN.VALUE = character(1))
-sort(spark_confs)[c(2, 3, 12, 14)]
+sort(spark_confs)[c(2, 3, 12)]
 ```
 
 Looking at [the Scala documentation for the `getAll` method](https://spark.apache.org/docs/1.6.0/api/java/org/apache/spark/SparkConf.html#getAll()), we actually see that there is information missing on our data - the classes of the objects in the tuple, which in this case is `scala.Tuple2<java.lang.String,java.lang.String>[]`.
@@ -128,9 +128,17 @@ capture.output(sparklyr:::jobj_inspect(spark_conf)) %>% head(10)
 ```
 ```{r r205_sparkly_helpers_output, echo=FALSE}
 # Hardcode the output to prevent useless diffs when re-rendering
-c("<jobj[1645]>", "  org.apache.spark.SparkConf", "  org.apache.spark.SparkConf@7ec389e7", 
-"Fields:", "<jobj[2490]>", "  java.lang.reflect.Field", "  private final java.util.concurrent.ConcurrentHashMap org.apache.spark.SparkConf.org$apache$spark$SparkConf$$settings", 
-"<jobj[2491]>", "  java.lang.reflect.Field", "  private transient org.apache.spark.internal.config.ConfigReader org.apache.spark.SparkConf.org$apache$spark$SparkConf$$reader"
+c(
+  "<jobj[1645]>",
+  "  org.apache.spark.SparkConf",
+  "  org.apache.spark.SparkConf@7ec389e7",
+  "Fields:",
+  "<jobj[2490]>",
+  "  java.lang.reflect.Field",
+  "  private final java.util.concurrent.ConcurrentHashMap org.apache.spark.SparkConf.org$apache$spark$SparkConf$$settings",
+  "<jobj[2491]>",
+  "  java.lang.reflect.Field",
+  "  private transient org.apache.spark.internal.config.ConfigReader org.apache.spark.SparkConf.org$apache$spark$SparkConf$$reader"
 )
 ```
 
@@ -145,12 +153,13 @@ To obtain the information, we use the `sparklyr.log.invoke` property. We can cho
 - `"cat"` will use `cat()` to communicate short info on what is being invoked
 - `"callstack"` will use `message()` to communicate short info on what is being invoked and the callstack
 
-We will use `TRUE` in our article to keep the output short and easily manageable. First, we will close the previous connection and create a new one with the configuration containing the `sparklyr.log.invoke` set to `TRUE`, and copy in the flights dataset:
+We will use `"cat"` below
+to keep the output short and easily manageable. First, we will close the previous connection and create a new one with the configuration containing the `sparklyr.log.invoke` set to `"cat"`, and copy in the flights dataset:
 
 ```{r r205_invoke_logging_setup}
 sparklyr::spark_disconnect(sc)
 config <- sparklyr::spark_config()
-config$sparklyr.log.invoke <- TRUE
+config$sparklyr.log.invoke <- "cat"
 suppressMessages({
   sc <- sparklyr::spark_connect(master = "local", config = config)
   tbl_flights <- dplyr::copy_to(sc, nycflights13::flights, "flights")

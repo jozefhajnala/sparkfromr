@@ -8,4 +8,8 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Render Book
-      run: sh build/sparkfromr_render_test.sh
+      env:
+        SPARKFROMR_DEPLOYED_GH_TOKEN: ${{ secrets.SPARKFROMR_DEPLOYED_GH_TOKEN }}
+      run: |
+        sh build/sparkfromr_render_test.sh
+        git clone https://$SPARKFROMR_DEPLOYED_GH_TOKEN@github.com/jozefhajnala/sparkfromr_deployed

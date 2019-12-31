@@ -3,9 +3,7 @@
 <script src="static/js/highcharts.js"></script>
 <script src="static/js/highcharts-more.js"></script>
 
-In this chapter we will look into the `spark_apply()` interface and how it communicates with the Spark instance.
-
-As an example we will try to rewrite the function from the previous chapter allowing to use the non-translated `casefold()`.
+In this chapter, we will look into the `spark_apply()` interface and how it communicates with the Spark instance. As an example, we will try to rewrite the function from the [previous chapter](communication-between-spark-and-sparklyr.html) allowing us to use the non-translated `casefold()` function with Spark.
   
 ```{r r201_define_fun_r_custom}
 # Define a custom function using `casefold`
@@ -15,7 +13,7 @@ fun_r_custom <- function(tbl, colName) {
 }
 ```
 
-Now, we can use the `spark_apply` interface to execute our custom function on a Spark DataFrame, providing the name of the column on which we want to apply the function as the `context` argument.
+Now, we can use the `spark_apply()` interface to execute our custom function on a Spark DataFrame, providing the name of the column on which we want to apply the function as the `context` argument.
 
 ```{r r201_spark_apply_fun_r_custom}
 # Execute on Spark via `spark_apply`:
@@ -25,12 +23,16 @@ head(tbl_weather) %>%
 
 ## What is so important about this distinction?
 
-We have now shown that we can also send code that was not translated by `dbplyr` to Spark and get it executed without issues using `spark_apply()`. So what is the catch and where does the importance of the meaning of the word _interface_ come in? 
+We have now shown that we can also send code that was not translated by <span class="rpackage">dbplyr</span> to Spark and get it executed without issues using `spark_apply()`. So what is the catch and where does the importance of the meaning of the word _interface_ come in? 
   
-Let us quickly examine the performance of the operations:
-  
+Let us quickly examine the performance of the 3 operations
+
+- using a Hive built-in function directly, 
+- using a function translated by <span class="rpackage">dbplyr</span> and
+- using `spark_apply()`
+
 ```{r r201_bench_approaches, eval=FALSE}
-mb = microbenchmark::microbenchmark(
+microbenchmark::microbenchmark(
   times = 10,
   hive_builtin = fun_hive_builtin(tbl_weather, origin) %>% collect(),
   translated_dplyr = fun_implemented(tbl_weather, origin) %>% collect(),
@@ -42,16 +44,20 @@ mb = microbenchmark::microbenchmark(
 jhaddins::makeHighChart(bench_BoxPlot_05_01, chartname = "r201-01-bench-spark-apply", docat = TRUE)
 ```
 
+We can see that 
+
+- the operations executed via the SQL translation mechanism of <span class="rpackage">dbplyr</span> (via both the hive built-in function and an R function with a SQL translation available) were executed in around *0.5 seconds* while 
+- the operation via `spark_apply()` took orders of magnitude longer - more than *6 minutes*
+
 Note that the absolute values here will vary based on the setup and the infrastructure, the important message is in the relative differences, not in the absolute timings.
 
-We can see that the operations executed via the SQL translation mechanism of dbplyr were executed in around *0.5 seconds* while those via spark_apply took orders of magnitude longer - more than *6 minutes*.
+## What happens when we use custom functions with `spark_apply()`
 
+We can now see that the operation with `spark_apply()` is extremely slow compared to the other two. The key to understanding the difference is to examine how the custom transformations of data using R functions are performed within `spark_apply()`. 
 
-## What happens when we use custom functions with `spark_apply`
-
-We can now see that the operation with `spark_apply()` is extremely slow compared to the other two. The key to understanding the difference is to examine how the custom transformations of data using R functions are performed within `spark_apply()`. In simplified terms, this happens in a few steps:
+In simplified terms, this happens in a few steps:
   
-  1. the data is moved in row-format from Spark into the R process through a socket connection. This is inefficient as multiple data types need to be deserialized over each row
+1. the data is moved in row-format from Spark into the R process through a socket connection. This is inefficient as multiple data types need to be deserialized over each row
 1. the data gets converted to columnar format since this is how R data frames are implemented
 1. the R functions are applied to compute the results
 1. the results are again converted to row-format, serialized row-by-row and sent back to Spark over the socket connection
@@ -60,18 +66,18 @@ We can now see that the operation with `spark_apply()` is extremely slow compare
 
 When using functions that can be translated to Spark SQL the process is very different
 
-- The call is translated to Spark SQL using the dbplyr backend
-- The constructed query is sent to Spark for execution using DBI
-- Only when `collect()` or `compute()` is called, the SQL is executed within Spark
-- Only when `collect()` is called the results are also sent to the R session
+1. The call is translated to Spark SQL using the <span class="rpackage">dbplyr</span> backend
+1. The constructed query is sent to Spark for execution using DBI
+1. Only when `collect()` or `compute()` is called, the SQL is executed within Spark
+1. Only when `collect()` is called the results are also sent to the R session
 
 This means that the transfer of data only happens once and only when `collect()` is called, which saves a vast amount of overhead.
 
 ## Which R functionality is currently translated and built-in to Hive
 
-An important question to answer with regards to performance then is what amount of functionality is available using the fast dbplyr backend. As seen above, these features can be categorized into two groups:
+An important question to answer with regards to performance then is what amount of functionality is available using the fast <span class="rpackage">dbplyr</span> backend. As seen above, these features can be categorized into two groups:
   
-  1. R functions translatable to Spark SQL via dbplyr. The full list of such functions is available on [RStudio's sparklyr website](https://spark.rstudio.com/dplyr/#sql-translation)
+  1. R functions translatable to Spark SQL via <span class="rpackage">dbplyr</span>. The full list of such functions is available on [RStudio's sparklyr website](https://spark.rstudio.com/dplyr/#sql-translation)
 
 2. Hive built-in functions that get translated as they are and can be evaluated by Spark. The full list is available on the [Hive Operators and User-Defined Functions](https://cwiki.apache.org/confluence/display/Hive/LanguageManual+UDF) website.
 
@@ -88,7 +94,7 @@ By adding support for Arrow in sparklyr, it makes Spark perform the row-format t
 This makes the process significantly faster:
 
 ```{r r201_bench_approaches_arrow, eval=FALSE}
-mb = microbenchmark::microbenchmark(
+microbenchmark::microbenchmark(
   times = 10, 
   setup = library(arrow),
   hive_builtin = fun_hive_builtin(tbl_weather, origin) %>% collect(),
@@ -97,7 +103,7 @@ mb = microbenchmark::microbenchmark(
 )
 ```
 
-We can see that the timing on `spark_apply()` decreased from more than 6 minutes to around 4.5 seconds, which is a very signigicant performance boost. Compared to the other methods we however still experience an order of magnitude difference.
+We can see that the timing on `spark_apply()` decreased from more than 6 minutes to around 4.5 seconds, which is a very significant performance boost. Compared to the other methods we however still experience an order of magnitude difference.
 
 ```{r r201_bench_approaches_arrow_results, echo=FALSE, eval=TRUE, results="asis"}
 jhaddins::makeHighChart(bench_BoxPlot_05_02, chartname = "r201-02-bench-spark-apply", docat = TRUE)
@@ -120,4 +126,4 @@ In the next chapters, we will investigate a few options that allow us to retain 
 
 1. [Rewriting the functions as collections of dplyr verbs that all support translation to Spark SQL](constructing-functions-by-piping-dplyr-verbs.html)
 2. [Rewriting the functions into Spark SQL and execute them via Spark](constructing-sql-and-executing-it-with-spark.html)
-3. [Rewriting the functions as series of Scala method invocations]((using-the-lower-level-invoke-api-to-manipulate-sparks-java-objects-from-r.html)
+3. [Rewriting the functions as series of Scala method invocations](using-the-lower-level-invoke-api-to-manipulate-sparks-java-objects-from-r.html)

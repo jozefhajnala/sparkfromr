@@ -19,5 +19,5 @@ rmd_files: [
   "content/231-invoke-reflection-logging.Rmd",
   "content/240-combining-approaches.Rmd",
   "content/400-references.Rmd",
-  "content/410-footnotes.Rmd"
+  "content/410-appendices.Rmd"
 ]

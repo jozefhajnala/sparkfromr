@@ -24,7 +24,7 @@ The crucial advantage is that even though the `lazy_spark_query` would return th
 We can therefore effectively combine multiple approaches to interfacing with Spark while still keeping the benefit of retrieving only very small, aggregated amounts of data to the R session. The effect is quite significant even with a dataset as small as `flights` (336,776 rows of 19 columns) and with a local Spark instance. The chart below compares executing a query lazily, aggregating within Spark and only retrieving the aggregated data, versus retrieving first and aggregating locally. The third boxplot shows the cost of pure collection on the query itself:
 
 ```{r r203_bench_lazy_spark_query, eval=FALSE, echo=TRUE}
-bench <- microbenchmark::microbenchmark(
+microbenchmark::microbenchmark(
   times = 20,
   collect_late = lazy_spark_query(tbl_flights, qry) %>%
     group_by(origin) %>%

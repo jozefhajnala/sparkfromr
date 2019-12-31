@@ -22,3 +22,8 @@ pre code {
   margin: 2em;
   border-left: 5px solid;
 }
+
+span.rpackage {
+  font-family: monospace;
+  font-style: italic;
+}

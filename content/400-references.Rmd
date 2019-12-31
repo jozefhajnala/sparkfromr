@@ -5,18 +5,18 @@
 ### Getting started with sparklyr
 
 - The [Getting Started chapter](https://therinspark.com/starting.html) of the Mastering Spark with R book
-- The [Prerequisites appendix ](https://therinspark.com/appendix.html#appendix-prerequisites) f the Mastering Spark with R book
+- The [Prerequisites appendix ](https://therinspark.com/appendix.html#appendix-prerequisites) of the Mastering Spark with R book
 - RStudio's [spark website](https://spark.rstudio.com/#installation)
-- Overview of the [dplyr syntax](https://dplyr.tidyverse.org/)
+- Overview of the [<span class="rpackage">dplyr</span> syntax](https://dplyr.tidyverse.org/)
 - The [Data transformation](https://r4ds.had.co.nz/transform.html) chapter of R for Data Science
 
 ### DBI, Spark SQL, Hive
 
 - [Spark SQL, Built-in Functions](https://spark.apache.org/docs/latest/api/sql/index.html)
 - Documentation on [Hive Operators and User-Defined Functions](https://cwiki.apache.org/confluence/display/Hive/LanguageManual+UDF) website
-- The [DBI package](https://cran.r-project.org/package=DBI) on CRAN
+- The [<span class="rpackage">DBI</span> package](https://cran.r-project.org/package=DBI) on CRAN
 - The [Introduction to DBI](https://db.rstudio.com/dbi/) page of Databases using R
-- The [Overview](https://dbplyr.tidyverse.org/) page of dbplyr documentation
+- The [Overview](https://dbplyr.tidyverse.org/) page of <span class="rpackage">dbplyr</span> documentation
 
 ### Docker
 
@@ -34,8 +34,8 @@
 
 - Homepage of [Apache Arrow](https://arrow.apache.org/)
 - Arrow C++ library [installation guide](https://arrow.apache.org/install/)
-- R package [arrow on CRAN](https://cran.r-project.org/package=arrow)
-- R package [arrow on GitHub](https://github.com/apache/arrow/tree/master/r)
+- R package [<span class="rpackage">arrow</span> on CRAN](https://cran.r-project.org/package=arrow)
+- R package [<span class="rpackage">arrow</span> on GitHub](https://github.com/apache/arrow/tree/master/r)
 
 ## Physical Books
 

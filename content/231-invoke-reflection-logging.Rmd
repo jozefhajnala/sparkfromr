@@ -8,13 +8,12 @@ Then darkness took me, and I strayed out of thought and time, and I wandered far
 
 In the previous chapters, we have shown how to write functions as both [combinations of dplyr verbs](https://jozef.io/r202-spark-r-dplyr-verbs/), [SQL query generators](https://jozef.io/r203-spark-r-sql/) that can be executed by Spark and [how to use the lower-level API](https://jozef.io/r204-spark-r-invoke-scala/) to invoke methods on Java object references from R.
 
-In this chapter, we will look into more details around sparklyr's `invoke()` API, investigate available methods for different classes of objects using the Java reflection API and look under the hood of the sparklyr interface mechanism with invoke logging.
+In this chapter, we will look into more details around <span class="rpackage">sparklyr</span>'s `invoke()` API, investigate available methods for different classes of objects using the Java reflection API and look under the hood of the <span class="rpackage">sparklyr</span> interface mechanism with invoke logging.
 
 
 ## Examining available methods from R
 
 If you did not do so, it is recommended to read the [previous chapter](using-the-lower-level-invoke-api-to-manipulate-sparks-java-objects-from-r.html) of this book before this one to get a quick overview of the `invoke()` API.
-
 
 ## Using the Java reflection API to list the available methods
 
@@ -29,7 +28,7 @@ mthds <- sc %>% spark_context() %>%
 head(mthds)
 ```
 
-We can see that the `invoke()` chain has returned a list of Java object references, each of them of class `java.lang.reflect.Method`. This is a good result, but the output is not very user-friendly from the R user perspective. Let us write a small wrapper that will return a some of the method's details in a more readable fashion, for instance the return type and an overview of parameters:
+We can see that the `invoke()` chain has returned a list of Java object references, each of them of class `java.lang.reflect.Method`. This is a good result, but the output is not very user-friendly from the R user perspective. Let us write a small wrapper that will return a some of the method's details in a more readable fashion, for instance the return type and an overview of parameters.
 
 ```{r r205_define_getMethodDetails}
 getMethodDetails <- function(mthd) {
@@ -40,7 +39,7 @@ getMethodDetails <- function(mthd) {
 }
 ```
 
-Finally, to get a nice overview, we can make another helper function that will return a named list of methods for an object's class, including their return types and overview of parameters:
+Finally, to get a nice overview, we can make another helper function that will return a named list of methods for an object's class, including their return types and overview of parameters.
 
 ```{r r205_define_getAvailableMethods}
 getAvailableMethods <- function(jobj) {
@@ -55,7 +54,7 @@ getAvailableMethods <- function(jobj) {
 
 ## Investigating DataSet and SparkContext class methods
 
-Using the above defined function we can explore the methods available to a DataFrame reference, showing a few of the names first:
+Using the above defined function we can explore the methods available to a DataFrame reference, showing a few of the names first.
 
 ```{r r205_preview_getAvailableMethods}
 dfMethods <- tbl_flights %>% spark_dataframe() %>%
@@ -66,7 +65,7 @@ dfMethodNames <- sort(unique(names(dfMethods)))
 head(dfMethodNames, 20)
 ```
 
-If we would like to see more details we can now investigate further, for instance show different parameter interfaces for the `agg` method, showing that the `agg` method has the following parameter interfaces:
+If we would like to see more details we can now investigate further, for instance show different parameter interfaces for the `agg` method, showing that the `agg` method has the following parameter interfaces.
 
 ```{r r205_investigate_methods_df}
 sort(vapply(
@@ -76,7 +75,7 @@ sort(vapply(
 ))
 ```
 
-Similarly, we can look at a `SparkContext` class and show some available methods that can be invoked:
+Similarly, we can look at a `SparkContext` class and show some available methods that can be invoked.
 
 ```{r r205_investigate_methods_sc}
 scMethods <- sc %>% spark_context() %>%
@@ -87,7 +86,7 @@ head(scMethodNames, 60)
 
 ### Using helpers to explore the methods
 
-We can also use the helper functions to investigate more. For instance, we see that there is a `getConf` method avaiable to us. Looking at the object reference however does not provide useful information, so we can list the methods for that class and look for `"get"` methods that would show us the configuration:
+We can also use the helper functions to investigate more. For instance, we see that there is a `getConf` method avaiable to us. Looking at the object reference however does not provide useful information, so we can list the methods for that class and look for `"get"` methods that would show us the configuration.
 
 ```{r r205_investigate_methods_conf}
 spark_conf <- sc %>% spark_context() %>% invoke("conf")
@@ -99,7 +98,7 @@ spark_conf_get_methods <- spark_conf_methods %>%
 spark_conf_get_methods
 ```
 
-We see that there is a `getAll` method that could prove useful, returning a list of tuples and taking no arguments as input:
+We see that there is a `getAll` method that could prove useful, returning a list of tuples and taking no arguments as input.
 
 ```{r r205_investigate_methods_conf_get}
 # Returns a list of tuples, takes no arguments:
@@ -117,7 +116,7 @@ We could therefore improve our helper to be more detailed in the return value in
 
 ### Unexported helpers provided by sparklyr
 
-The sparklyr package itself provides facilities of nature similar to those above, looking at some of them, even though they are not exported:
+The <span class="rpackage">sparklyr</span> package itself provides facilities of nature similar to those above, looking at some of them, even though they are not exported.
 
 ```{r r205_sparkly_helpers}
 sparklyr:::jobj_class(spark_conf)
@@ -145,7 +144,7 @@ c(
 
 ## How sparklyr communicates with Spark, invoke logging
 
-Now that we have and overview of the `invoke()` interface, we can take a look under the hood of sparklyr and see how it actually communicates with the Spark instance. In fact, the communication is a set of invocations that can be very different depending on which of the approches we choose for our purposes.
+Now that we have and overview of the `invoke()` interface, we can take a look under the hood of <span class="rpackage">sparklyr</span> and see how it actually communicates with the Spark instance. In fact, the communication is a set of invocations that can be very different depending on which of the approches we choose for our purposes.
 
 To obtain the information, we use the `sparklyr.log.invoke` property. We can choose one of the following 3 values based on our preferences:
 
@@ -153,8 +152,7 @@ To obtain the information, we use the `sparklyr.log.invoke` property. We can cho
 - `"cat"` will use `cat()` to communicate short info on what is being invoked
 - `"callstack"` will use `message()` to communicate short info on what is being invoked and the callstack
 
-We will use `"cat"` below
-to keep the output short and easily manageable. First, we will close the previous connection and create a new one with the configuration containing the `sparklyr.log.invoke` set to `"cat"`, and copy in the flights dataset:
+We will use `"cat"` below to keep the output short and easily manageable. First, we will close the previous connection and create a new one with the configuration containing the `sparklyr.log.invoke` set to `"cat"`, and copy in the flights dataset:
 
 ```{r r205_invoke_logging_setup}
 sparklyr::spark_disconnect(sc)
@@ -168,37 +166,39 @@ suppressMessages({
 
 ### Using dplyr verbs translated with dbplyr
 
-Now that the setup is complete, we use the dplyr verb approach to retrieve the count of rows and look the invocations that this entails:
+Now that the setup is complete, we use the <span class="rpackage">dplyr</span> verb approach to retrieve the count of rows and look the invocations that this entails.
 
 ```{r r205_invoke_logging_dplyr}
 tbl_flights %>% dplyr::count()
 ```
 
-We see multiple invocations do the `sql` method and also the `columns` method. This makes sense since the dplyr verb approach actually works by translating the commands into Spark SQL via dbplyr and then sends those translated commands to Spark via that interface.
+We see multiple invocations do the `sql` method and also the `columns` method. This makes sense since the <span class="rpackage">dplyr</span> verb approach actually works by translating the commands into Spark SQL via <span class="rpackage">dbplyr</span> and then sends those translated commands to Spark via that interface.
 
 ### Using DBI to send queries
 
-Similarly, we can investigate the invocations that happen when we try to retrieve the same results via the DBI interface:
+Similarly, we can investigate the invocations that happen when we try to retrieve the same results via the <span class="rpackage">DBI</span> interface:
 
 ```{r r205_invoke_logging_dbi}
 DBI::dbGetQuery(sc, "SELECT count(1) AS n FROM flights")
 ```
 
-We see slightly fewer invocations compared to the above dplyr approach, but the output is also less processed.
+We see slightly fewer invocations compared to the above <span class="rpackage">dplyr</span> approach, but the output is also less processed.
 
 ### Using the invoke interface
 
-Looking at the invocations that get executed using the `invoke()` interface:
+Looking at the invocations that get executed using the `invoke()` interface.
 
 ```{r r205_invoke_logging_invoke}
 tbl_flights %>% spark_dataframe() %>% invoke("count")
 ```
 
-We see that the amount of invocations is much lower, where the top 3 invocations come from the first part of the pipe. The `invoke("count")` part translated to exactly one invocation to the `count` method. We see therefore that the `invoke()` interface is indeed a more lower-level interface that invokes methods as we request them, with little to none overhead related to translations and other effects.
+We see that the amount of invocations is much lower, where the top 3 invocations come from the first part of the pipe. The `invoke("count")` part translated to exactly one invocation to the `count` method.
+
+We see therefore that the `invoke()` interface is indeed a more lower-level interface that invokes methods as we request them, with little to no overhead related to translations and other effects.
 
 ### Redirecting the invoke logs
 
-When running R applications that use Spark as a calculation engine, it is useful to get detailed invoke logs for debugging and diagnostic purposes. Implementing such mechanisms, we need to take into consideration how R handles the invoke logs produced by sparklyr. In simple terms, the invoke logs produced when using 
+When running R applications that use Spark as a calculation engine, it is useful to get detailed invoke logs for debugging and diagnostic purposes. Implementing such mechanisms, we need to take into consideration how R handles the invoke logs produced by <span class="rpackage">sparklyr</span>. In simple terms, the invoke logs produced when using 
 
 - `TRUE` and `"callstack"` are created using `message()`, which means they get sent to the `stderr()` connection by default
 - `"cat"` are created using `cat()`, so they get sent to `stdout()` connection by default
@@ -208,4 +208,4 @@ This info can prove useful when redirecting the log information from standard ou
 
 ## Conclusion
 
-In this chapter, we have looked at using the Java reflection API with sparklyr's `invoke()` interface to get useful insight on available methods for different object types that can be used in the context of Spark, but also in other contexts. Using invoke logging, we have also shown how the different sparklyr interfacing methods communicate with Spark under the hood.
+In this chapter, we have looked at using the Java reflection API with <span class="rpackage">sparklyr</span>'s `invoke()` interface to get useful insight on available methods for different object types that can be used in the context of Spark, but also other contexts. Using invoke logging, we have also shown how the different <span class="rpackage">sparklyr</span> interfacing methods communicate with Spark under the hood.

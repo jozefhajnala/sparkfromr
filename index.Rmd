@@ -11,18 +11,35 @@ description: "This bookdown publication attempts to provide practical insights i
 
 # Welcome
 
-Apache Spark is a popular open-source analytics engine for big data processing and thanks to the sparklyr and SparkR packages, the power of Spark is also available to R users.
+Apache Spark is a popular open-source analytics engine for big data processing and thanks to the <span class="rpackage">sparklyr</span> and <span class="rpackage">SparkR</span> packages, the power of Spark is also available to R users.
 
-This short bookdown publication attempts to provide practical insights into using the sparklyr interface to gain the benefits of Apache Spark while still retaining the ability to use R code organized in custom-built functions and packages. 
+## What will you find in this book
 
-The focus of this publication is on exploring the *different interfaces* avaialable for communication between R and Spark using the sparklyr package, namely:
+This short publication attempts to provide practical insights into using the <span class="rpackage">sparklyr</span> interface to gain the benefits of Apache Spark while still retaining the ability to use R code organized in custom-built functions and packages.
+
+This publication __focuses on exploring the different interfaces__ available for communication between R and Spark using the <span class="rpackage">sparklyr</span> package, namely:
 
 - [Constructing functions by piping dplyr verbs](constructing-functions-by-piping-dplyr-verbs.html)
 - [Constructing SQL and executing it with Spark](constructing-sql-and-executing-it-with-spark.html)
 - [Using the lower-level invoke API to manipulate Spark’s Java objects from R](using-the-lower-level-invoke-api-to-manipulate-sparks-java-objects-from-r.html)
 - [Exploring the invoke API from R with Java reflection and examining invokes with logs](exploring-the-invoke-api-from-r-with-java-reflection-and-examining-invokes-with-logs.html)
 
-If you are interested in the sparklyr package and working with Spark from R in general, we strongly recommend the _very comprehensive [Mastering Spark with R](https://therinspark.com/) book_ available online for free.
+If you are interested in the <span class="rpackage">sparklyr</span> package and working with Spark from R in general, we strongly recommend the very comprehensive [Mastering Spark with R](https://therinspark.com/) book available online for free.
+
+## Book sources
+
+This book is rendered and published automatically from publicly accessible git repositories, you can find the
+
+- Content sources in the [sparkfromr GitHub repository](https://github.com/jozefhajnala/sparkfromr)
+- Rendered version in the [sparkfrom_deployed GitHub repository](https://github.com/jozefhajnala/sparkfromr_deployed)
+- Automatically built Docker image used to render the book on [DockerHub](https://hub.docker.com/repository/docker/jozefhajnala/sparkfromr)
+- Sources used to build the Docker images in the [sparkfrom_docker GitHub repository](https://github.com/jozefhajnala/sparkfromr_docker)
+
+All contributions to the above are most welcome.
+
+## Acknowledgments
+
+The creation of this book would not be possible without many openly available resources such as the R packages around the <span class="rpackage">rmarkdown</span> ecosystem created by [Yihui Xie](https://yihui.org/en/), namely the <span class="rpackage">bookdown</span> package via which this publication is rendered. This project also heavily relies on [the Rocker Project](https://www.rocker-project.org/) which provides Docker images for the R environment thanks to [Carl Boettiger](https://www.carlboettiger.info/), [Dirk Eddelbuettel](http://dirk.eddelbuettel.com/), and [Noam Ross](https://www.noamross.net/). Last but not least there would be nothing to write about in this short book if the <span class="rpackage">sparklyr</span> package was not written by [Javier Luraschi](https://github.com/javierluraschi/) et al., the R programming language itself maintained by the [R core](https://www.r-project.org/contributors.html) group and the [Apache Spark](https://spark.apache.org/) creators and maintainers. My thanks go to the creators and maintainers of all these amazing open-source tools.
 
 ```{block, type='wizardry'}
 Differences of habit and language are nothing at all if our aims are identical and our hearts are open

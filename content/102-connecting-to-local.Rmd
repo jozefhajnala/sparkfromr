@@ -1,11 +1,11 @@
 # Connecting and using a local Spark instance
 
-The following code chunks will prepare the R session for us to be able to experiment with the code presented in the book. We will attach the needed R packages, initialize and connect to a local Spark instance and copy the weather and flights datasets from the nycflights13 package to the Spark instance such that we can work with them in our examples.
+The following code chunks will prepare the R session for us to be able to experiment with the code presented in the book. We will attach the needed R packages, initialize and connect to a local Spark instance and copy the `weather` and `flights` datasets from the <span class="rpackage">nycflights13</span> package to the Spark instance such that we can work with them in our examples.
 
 
 ## Packages and data
 
-We will be using the sparklyr package to interface with Spark and since this packages works very well with the dplyr package and its vocabulary, we will take advantage of the dplyr syntax and the pipe operator. As a source of data, we will use the nycflights13 package that conveniently provides airline data for flights departing New York City in 2013. 
+We will be using the sparklyr package to interface with Spark and since this package works very well with the <span class="rpackage">dplyr</span> package and its vocabulary, we will take advantage of the dplyr syntax and the pipe operator. As a source of data for our code examples, we will use the <span class="rpackage">nycflights13</span> package that conveniently provides airline data for flights departing New York City in 2013.
 
 ```{r r202_preparation}
 # Attach packages
@@ -54,7 +54,7 @@ tbl_flights <- dplyr::copy_to(
 
 ## First glance at the data
 
-To make sure our datasets are available in the Spark instance, we can look at the first few rows of the two datasets we have copied to Spark. Notice how the print shows `Source: spark<?> [?? x`, telling us that the data inded comes from a Spark instance and the data frames have an unknown amount of rows. This is because Spark will do minimal work to show us just the first 6 rows, instead of going though the entire dataset.
+To make sure our datasets are available in the Spark instance, we can look at the first few rows of the two datasets we have copied to Spark. Notice how the print shows `Source: spark<?> [?? x`, telling us that the data indeed comes from a Spark instance and the data frames have an unknown amount of rows. This is because Spark will do minimal work to show us just the first 6 rows, instead of going through the entire dataset. We will talk more about the lazy nature of Spark operations in the later chapters.
 
 ```{r 202_glance}
 head(tbl_flights)

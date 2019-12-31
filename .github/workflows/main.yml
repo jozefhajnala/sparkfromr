@@ -10,7 +10,7 @@ jobs:
     - name: Render Book
       run: sh build/sparkfromr_render_test.sh
     - name: Deploy site
-      if: github.ref == 'master'
+      if: ((github.ref == 'master') || (github.event.pull_request.merged == true && github.base_ref == 'master'))
       env:
         SPARKFROMR_DEPLOYED_GH_TOKEN: ${{ secrets.SPARKFROMR_DEPLOYED_GH_TOKEN }}
       run: |

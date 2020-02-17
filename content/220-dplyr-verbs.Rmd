@@ -91,7 +91,7 @@ tbl_weather %>%
 
 ## A more complex use case - Joins, group bys, and aggregations
 
-The dplyr syntax makes it very easy to construct more complex aggregations across multiple Spark DataFrames. An example of a function that joins 2 Spark DataFrames and computes a mean of a selected column, grouped by another column can look as follows:
+The <span class="rpackage">dplyr</span> syntax makes it very easy to construct more complex aggregations across multiple Spark DataFrames. An example of a function that joins 2 Spark DataFrames and computes a mean of a selected column, grouped by another column can look as follows:
 
 ```{r r202_define_joingrpagg_dplyr}
 joingrpagg_dplyr <- function(
@@ -169,11 +169,11 @@ Another example of a different behavior is joining due to matching column values
 
 ### Portability of used methods
 
-And, rather obviously, when using Hive built-in functions in the dplyr-based function, we will most likely not be able to execute it on the local data frames, as we have [seen previously](communication-between-spark-and-sparklyr.html#a-hive-built-in-function-not-existing-in-r).
+And, rather obviously, when using Hive built-in functions in the <span class="rpackage">dplyr</span>-based function, we will most likely not be able to execute it on the local data frames, as we have [seen previously](communication-between-spark-and-sparklyr.html#a-hive-built-in-function-not-existing-in-r).
 
 ## Conclusion, take-home messages
 
-In this chapter, we have shown that we can take advantage of the performance of Spark while still writing arbitrary R functions by using dplyr syntax, which supports translation to Spark SQL using the <span class="rpackage">dbplyr</span> backend. We have also looked at some important differences when applying the same dplyr transformations to local and remote data sets.
+In this chapter, we have shown that we can take advantage of the performance of Spark while still writing arbitrary R functions by using <span class="rpackage">dplyr</span> syntax, which supports translation to Spark SQL using the <span class="rpackage">dbplyr</span> backend. We have also looked at some important differences when applying the same dplyr transformations to local and remote data sets.
 
 With this approach, we can use R development best practices, testing, and documentation methods in a standard way when writing our R packages, getting the best of both worlds - Apache Spark for performance and R for convenient development of data science applications.
 

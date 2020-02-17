@@ -152,7 +152,7 @@ tbl_flights %>%
 
 ## Reconstructing variable normalization
 
-Now we will attempt to construct the variable normalization that we have shown in the previous parts with dplyr verbs and SQL generation - we will normalize the values of a column by first subtracting the mean value and then dividing the values by the standard deviation:
+Now we will attempt to construct the variable normalization that we have shown in the previous parts with <span class="rpackage">dplyr</span> verbs and SQL generation - we will normalize the values of a column by first subtracting the mean value and then dividing the values by the standard deviation:
 
 ```{r r204_define_normalize_invoke}
 normalize_invoke <- function(tbl, colName) {

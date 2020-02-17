@@ -28,7 +28,7 @@ mthds <- sc %>% spark_context() %>%
 head(mthds)
 ```
 
-We can see that the `invoke()` chain has returned a list of Java object references, each of them of class `java.lang.reflect.Method`. This is a good result, but the output is not very user-friendly from the R user perspective. Let us write a small wrapper that will return a some of the method's details in a more readable fashion, for instance the return type and an overview of parameters.
+We can see that the `invoke()` chain has returned a list of Java object references, each of them of class `java.lang.reflect.Method`. This is a good result, but the output is not very user-friendly from the R user perspective. Let us write a small wrapper that will return some of the method's details in a more readable fashion, for instance the return type and an overview of parameters.
 
 ```{r r205_define_getMethodDetails}
 getMethodDetails <- function(mthd) {
@@ -166,13 +166,13 @@ suppressMessages({
 
 ### Using dplyr verbs translated with dbplyr
 
-Now that the setup is complete, we use the <span class="rpackage">dplyr</span> verb approach to retrieve the count of rows and look the invocations that this entails.
+Now that the setup is complete, we use the <span class="rpackage">dplyr</span> verb approach to retrieve the count of rows and look at the invocations that this entails.
 
 ```{r r205_invoke_logging_dplyr}
 tbl_flights %>% dplyr::count()
 ```
 
-We see multiple invocations do the `sql` method and also the `columns` method. This makes sense since the <span class="rpackage">dplyr</span> verb approach actually works by translating the commands into Spark SQL via <span class="rpackage">dbplyr</span> and then sends those translated commands to Spark via that interface.
+We see multiple invocations to the `sql` method and also the `columns` method. This makes sense since the <span class="rpackage">dplyr</span> verb approach actually works by translating the commands into Spark SQL via <span class="rpackage">dbplyr</span> and then sends those translated commands to Spark via that interface.
 
 ### Using DBI to send queries
 

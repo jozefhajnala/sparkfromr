@@ -22,7 +22,8 @@ The `invoke()` interface is powerful, but also a bit hidden from the eyes as we 
 For instance, retrieving a list of methods for the `org.apache.spark.SparkContext` class:
 
 ```{r r205_invoke_getmethods}
-mthds <- sc %>% spark_context() %>%
+mthds <- sc %>%
+  spark_context() %>%
   invoke("getClass") %>%
   invoke("getMethods")
 head(mthds)
@@ -32,8 +33,11 @@ We can see that the `invoke()` chain has returned a list of Java object referenc
 
 ```{r r205_define_getMethodDetails}
 getMethodDetails <- function(mthd) {
-  returnType <- mthd %>% invoke("getReturnType") %>% invoke("toString")
-  params <- mthd %>% invoke("getParameters")
+  returnType <- mthd %>%
+    invoke("getReturnType") %>%
+    invoke("toString")
+  params <- mthd %>%
+    invoke("getParameters")
   params <- vapply(params, invoke, "toString", FUN.VALUE = character(1))
   c(returnType = returnType, params = paste(params, collapse = ", "))
 }
@@ -89,8 +93,8 @@ head(scMethodNames, 60)
 We can also use the helper functions to investigate more. For instance, we see that there is a `getConf` method avaiable to us. Looking at the object reference however does not provide useful information, so we can list the methods for that class and look for `"get"` methods that would show us the configuration.
 
 ```{r r205_investigate_methods_conf}
-spark_conf <- sc %>% spark_context() %>% invoke("conf")
-spark_conf_methods <- spark_conf %>% getAvailableMethods() 
+spark_conf <- spark_context(sc) %>% invoke("conf")
+spark_conf_methods <- getAvailableMethods(spark_conf) 
 spark_conf_get_methods <- spark_conf_methods %>%
   names() %>%
   grep(pattern = "get", ., value = TRUE) %>%
@@ -189,7 +193,9 @@ We see slightly fewer invocations compared to the above <span class="rpackage">d
 Looking at the invocations that get executed using the `invoke()` interface.
 
 ```{r r205_invoke_logging_invoke}
-tbl_flights %>% spark_dataframe() %>% invoke("count")
+tbl_flights %>%
+  spark_dataframe() %>%
+  invoke("count")
 ```
 
 We see that the amount of invocations is much lower, where the top 3 invocations come from the first part of the pipe. The `invoke("count")` part translated to exactly one invocation to the `count` method.

@@ -1,12 +1,12 @@
 # Constructing SQL and executing it with Spark
 
-In the [previous chapter](constructing-functions-by-piping-dplyr-verbs.html) of this series, we looked at writing R functions that can be executed directly by Spark without serialization overhead with a focus on writing functions as combinations of dplyr verbs and investigated how the SQL is generated and Spark plans created.
+In the [previous chapter](constructing-functions-by-piping-dplyr-verbs.html) of this series, we looked at writing R functions that can be executed directly by Spark without serialization overhead with a focus on writing functions as combinations of <span class="rpackage">dplyr</span> verbs and investigated how the SQL is generated and Spark plans created.
 
 In this chapter, we will look at how to write R functions that generate SQL queries that can be executed by Spark, how to execute them using the package <span class="rpackage">DBI</span> and how to achieve lazy SQL statements that only get executed when needed. We also briefly present wrapping these approaches into functions that can be combined with other Spark operations.
 
 ## R functions as Spark SQL generators
 
-There are use cases where it is desirable to express the operations directly with SQL instead of combining dplyr verbs, for example when working within multi-language environments where re-usability is important. We can then send the SQL query directly to Spark to be executed. To create such queries, one option is to write R functions that work as query constructors.
+There are use cases where it is desirable to express the operations directly with SQL instead of combining <span class="rpackage">dplyr</span> verbs, for example when working within multi-language environments where re-usability is important. We can then send the SQL query directly to Spark to be executed. To create such queries, one option is to write R functions that work as query constructors.
 
 Again using a very simple example, a naive implementation of column normalization could look as follows. Note that the use of `SELECT *` is discouraged and only here for illustration purposes.
 
@@ -138,7 +138,7 @@ tbl_weather %>%
   select(id, id_div_5)
 ```
 
-This is due to the fact that translation to integer division is quite difficult to implement: https://github.com/tidyverse/dbplyr/issues/108. We could certainly figure our a way to fix this particular issue, but the workarounds may prove inefficient:
+This is due to the fact that translation to integer division is quite difficult to implement: https://github.com/tidyverse/dbplyr/issues/108. We could certainly figure out a way to fix this particular issue, but the workarounds may prove inefficient:
 
 ```{r r203_int_div_spark_workaround}
 tbl_weather %>%

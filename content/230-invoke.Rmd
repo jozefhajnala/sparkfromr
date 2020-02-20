@@ -34,7 +34,8 @@ We can start with a few very simple examples of `invoke()` usage, for instance g
 
 ```{r r204_invoke_preview_count}
 # Get the count of rows
-tbl_flights %>% spark_dataframe() %>%
+tbl_flights %>%
+  spark_dataframe() %>%
   invoke("count")
 ```
 
@@ -43,7 +44,8 @@ We see one extra operation before invoking the count: `spark_dataframe()`. This 
 Now, for something more exciting, let us compute a summary of the variables in `tbl_flights` using the `describe` method:
 
 ```{r r204_invoke_preview_summary}
-tbl_flights_summary <- tbl_flights %>% spark_dataframe() %>%
+tbl_flights_summary <- tbl_flights %>%
+  spark_dataframe() %>%
   invoke("describe", as.list(colnames(tbl_flights))) %>%
   sdf_register()
 tbl_flights_summary
@@ -60,7 +62,8 @@ body(sparklyr::sdf_describe)
 If we so wish, for DataFrame related object references, we can also call `collect()` to retrieve the results directly, without using `sdf_register()` first, for instance retrieving the full content of the `origin` column:
 
 ```{r r204_invoke_preview_select}
-tbl_flights %>% spark_dataframe() %>%
+tbl_flights %>%
+  spark_dataframe() %>%
   invoke("select", "origin", list()) %>%
   collect()
 ```
@@ -68,14 +71,16 @@ tbl_flights %>% spark_dataframe() %>%
 It can also be helpful to investigate the schema of our `flights` DataFrame:
 
 ```{r r204_invoke_preview_schema}
-tbl_flights %>% spark_dataframe() %>%
+tbl_flights %>%
+  spark_dataframe() %>%
   invoke("schema")
 ```
 
 We can also use the invoke interface on other objects, for instance the `SparkContext`. Let's for instance retrieve the `uiWebUrl` of our context:
 
 ```{r r204_invoke_preview_uiweburl}
-sc %>% spark_context() %>%
+sc %>%
+  spark_context() %>%
   invoke("uiWebUrl") %>%
   invoke("toString")
 ```
@@ -136,9 +141,10 @@ Next, we can wrap around the entire process to make a more generic aggregation f
 ```{r r204_define_grpagg_invoke}
 grpagg_invoke <- function(tbl, colName, groupColName, aggOperation) {
   avgColumn <- tbl %>% agg_expr(paste0(aggOperation, "(", colName, ")"))
-  tbl %>%  spark_dataframe() %>% 
+  tbl %>%
+    spark_dataframe() %>%
     invoke("groupBy", groupColName, list()) %>%
-    invoke("agg", avgColumn, list()) %>% 
+    invoke("agg", avgColumn, list()) %>%
     sdf_register()
 }
 ```
@@ -152,15 +158,19 @@ tbl_flights %>%
 
 ## Reconstructing variable normalization
 
-Now we will attempt to construct the variable normalization that we have shown in the previous parts with dplyr verbs and SQL generation - we will normalize the values of a column by first subtracting the mean value and then dividing the values by the standard deviation:
+Now we will attempt to construct the variable normalization that we have shown in the previous parts with <span class="rpackage">dplyr</span> verbs and SQL generation - we will normalize the values of a column by first subtracting the mean value and then dividing the values by the standard deviation:
 
 ```{r r204_define_normalize_invoke}
 normalize_invoke <- function(tbl, colName) {
   sdf <- tbl %>% spark_dataframe()
   stdCol <- agg_expr(tbl, paste0("stddev_samp(", colName, ")"))
   avgCol <- agg_expr(tbl, paste0("avg(", colName, ")"))
-  avgTemp <- sdf %>% invoke("agg", avgCol, list()) %>% invoke("first")
-  stdTemp <- sdf %>% invoke("agg", stdCol, list()) %>% invoke("first")
+  avgTemp <- sdf %>%
+    invoke("agg", avgCol, list()) %>%
+    invoke("first")
+  stdTemp <- sdf %>%
+    invoke("agg", stdCol, list()) %>%
+    invoke("first")
   newCol <- sdf %>%
     invoke("col", colName) %>%
     invoke("minus", as.numeric(avgTemp)) %>%

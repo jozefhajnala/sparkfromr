@@ -22,18 +22,22 @@ The `invoke()` interface is powerful, but also a bit hidden from the eyes as we 
 For instance, retrieving a list of methods for the `org.apache.spark.SparkContext` class:
 
 ```{r r205_invoke_getmethods}
-mthds <- sc %>% spark_context() %>%
+mthds <- sc %>%
+  spark_context() %>%
   invoke("getClass") %>%
   invoke("getMethods")
 head(mthds)
 ```
 
-We can see that the `invoke()` chain has returned a list of Java object references, each of them of class `java.lang.reflect.Method`. This is a good result, but the output is not very user-friendly from the R user perspective. Let us write a small wrapper that will return a some of the method's details in a more readable fashion, for instance the return type and an overview of parameters.
+We can see that the `invoke()` chain has returned a list of Java object references, each of them of class `java.lang.reflect.Method`. This is a good result, but the output is not very user-friendly from the R user perspective. Let us write a small wrapper that will return some of the method's details in a more readable fashion, for instance the return type and an overview of parameters.
 
 ```{r r205_define_getMethodDetails}
 getMethodDetails <- function(mthd) {
-  returnType <- mthd %>% invoke("getReturnType") %>% invoke("toString")
-  params <- mthd %>% invoke("getParameters")
+  returnType <- mthd %>%
+    invoke("getReturnType") %>%
+    invoke("toString")
+  params <- mthd %>%
+    invoke("getParameters")
   params <- vapply(params, invoke, "toString", FUN.VALUE = character(1))
   c(returnType = returnType, params = paste(params, collapse = ", "))
 }
@@ -89,8 +93,8 @@ head(scMethodNames, 60)
 We can also use the helper functions to investigate more. For instance, we see that there is a `getConf` method avaiable to us. Looking at the object reference however does not provide useful information, so we can list the methods for that class and look for `"get"` methods that would show us the configuration.
 
 ```{r r205_investigate_methods_conf}
-spark_conf <- sc %>% spark_context() %>% invoke("conf")
-spark_conf_methods <- spark_conf %>% getAvailableMethods() 
+spark_conf <- spark_context(sc) %>% invoke("conf")
+spark_conf_methods <- getAvailableMethods(spark_conf) 
 spark_conf_get_methods <- spark_conf_methods %>%
   names() %>%
   grep(pattern = "get", ., value = TRUE) %>%
@@ -166,13 +170,13 @@ suppressMessages({
 
 ### Using dplyr verbs translated with dbplyr
 
-Now that the setup is complete, we use the <span class="rpackage">dplyr</span> verb approach to retrieve the count of rows and look the invocations that this entails.
+Now that the setup is complete, we use the <span class="rpackage">dplyr</span> verb approach to retrieve the count of rows and look at the invocations that this entails.
 
 ```{r r205_invoke_logging_dplyr}
 tbl_flights %>% dplyr::count()
 ```
 
-We see multiple invocations do the `sql` method and also the `columns` method. This makes sense since the <span class="rpackage">dplyr</span> verb approach actually works by translating the commands into Spark SQL via <span class="rpackage">dbplyr</span> and then sends those translated commands to Spark via that interface.
+We see multiple invocations to the `sql` method and also the `columns` method. This makes sense since the <span class="rpackage">dplyr</span> verb approach actually works by translating the commands into Spark SQL via <span class="rpackage">dbplyr</span> and then sends those translated commands to Spark via that interface.
 
 ### Using DBI to send queries
 
@@ -189,7 +193,9 @@ We see slightly fewer invocations compared to the above <span class="rpackage">d
 Looking at the invocations that get executed using the `invoke()` interface.
 
 ```{r r205_invoke_logging_invoke}
-tbl_flights %>% spark_dataframe() %>% invoke("count")
+tbl_flights %>%
+  spark_dataframe() %>%
+  invoke("count")
 ```
 
 We see that the amount of invocations is much lower, where the top 3 invocations come from the first part of the pipe. The `invoke("count")` part translated to exactly one invocation to the `count` method.
